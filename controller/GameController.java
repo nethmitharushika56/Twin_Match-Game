@@ -2,6 +2,15 @@ package controller;
 
 import javax.swing.*;
 
+import model.GameLevel;
+import model.GameState;
+import model.HighScoreManager;
+import model.Tile;
+import util.SoundManager;
+import view.GameWindow;
+import view.LevelSelectScreen;
+import view.StartScreen;
+
 import java.awt.Insets;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,29 +35,25 @@ public class GameController {
                 gameState.setTimeLimit(180); // 3 minutes
                 // You may handle additional levels here if needed
         }
+        if (gameState == null || gameState.isGameOver() || gameState.isPaused()) return;
 
-        Object gameWindow = null;
+        GameWindow gameWindow = null;
+        // Ensure gameWindow is a field so it can be accessed elsewhere
         if (gameWindow == null) {
             gameWindow = new GameWindow(this);
         }
-
-        ((GameWindow) gameWindow).startNewGame(gameState);
+        gameWindow.startNewGame(gameState);
         startTimer();
-    }
 
-    /**
-     * Called when a tile is selected from the UI
-     */
-    public void onTileSelected(int row, int col) {
-        Object gameState = null;
-        if (gameState == null || ((GameState) gameState).isGameOver() || ((GameState) gameState).isPaused()) return;
-
+        Object col = null;
+        Object row = null;
+        // col and row should be passed as parameters or determined by user action, not hardcoded
+        // Remove their initialization here
         Tile selectedTile = ((GameState) gameState).getTile(row, col);
         if (selectedTile == null || selectedTile.isMatched() || selectedTile.isFlipped()) return;
 
         selectedTile.flip();
         SoundManager.playTileFlipSound();
-        GameWindow gameWindow = null;
         gameWindow.updateTile(row, col);
 
         if (((GameState) gameState).getFirstSelection() == null) {
@@ -111,9 +116,7 @@ public class GameController {
             gameTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    SwingUtilities swingUtilities = new SwingUtilities();
-                    SwingUtilities swingUtilities2 = new SwingUtilities();
-                    swingUtilities2.invokeLater(() -> {
+                    SwingUtilities.invokeLater(() -> {
                         GameState gameState = GameState.getInstance();
                         int timeLeft = gameState.getTimeRemaining();
                         GameWindow gameWindow = GameWindow.getInstance();
@@ -123,9 +126,9 @@ public class GameController {
                         if (timeLeft <= 0) {
                             endGame(false);
                         }
-                }
-            }, 1000, 1000);
-        }
+            });
+        
+        }}, null, timeRemaining);}
     }
 
     /**
@@ -191,13 +194,48 @@ public class GameController {
         startGame(); // Redirect to StartScreen
     }
 
-    private void startGame() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'startGame'");
+    public void startGame() {
+        new StartScreen(this);
     }
 
+    public void showLevelSelection() {
+        // Display the Level Selection screen
+        LevelSelectionScreen levelSelectionScreen = new LevelSelectionScreen(this);
+        levelSelectionScreen.setVisible(true);
+    }
+    
+
 	public void startNewGame(GameLevel level) {
+        GameState gameState = GameState.getInstance();
+        gameState.reset(); // Make sure this resets selections, matches, etc.
+        gameState.setLevel((GameLevel) level);
+    
+        if (level == GameLevel.BEGINNER) {
+            gameState.setTotalPairs(4);
+            gameState.setTimeLimit(0); // no limit
+        } else if (level == GameLevel.INTERMEDIATE) {
+            gameState.setTotalPairs(8);
+            gameState.setTimeLimit(180); // 3 min
+        } else if (level == GameLevel.ADVANCED) {
+            gameState.setTotalPairs(12);
+            gameState.setTimeLimit(120); // 2 min
+        }
+    
+        GameWindow gameWindow = new GameWindow(this);
+        gameWindow.startNewGame(gameState);
+        startTimer();
+    }
+    
+
+    public void showGameScreen(GameLevel level) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'showGameScreen'");
+    }
+
+	public void onTileSelected(int finalRow, int finalCol) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'startNewGame'");
+		throw new UnsupportedOperationException("Unimplemented method 'onTileSelected'");
 	}
+    
+    
 }

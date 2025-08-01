@@ -65,6 +65,10 @@ public class GameState {
         this.paused = false;
     }
     
+    public GameState(GameLevel level2) {
+        //TODO Auto-generated constructor stub
+    }
+
     /**
      * Reset the game state for a new game
      */
@@ -201,8 +205,8 @@ public class GameState {
         return level;
     }
     
-    public void setLevel(GameLevel level) {
-        this.level = level;
+    public void setLevel(GameLevel intermediate) {
+        this.level = intermediate;
     }
     
     public Tile[][] getTiles() {
@@ -313,4 +317,19 @@ public class GameState {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'getInstance'");
 	}
+
+    public Tile getTile(Object row, Object col) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTile'");
+    }
+
+    public void decrementTime() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'decrementTime'");
+    }
+
+    public void reset() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reset'");
+    }
 } 

@@ -1,6 +1,9 @@
 package view;
 
 import javax.swing.*;
+
+import model.HighScoreManager;
+
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,7 +34,7 @@ public class HighScoreDialog extends JDialog {
         titleLabel.setForeground(new Color(70, 130, 180));
         
         // High scores table
-        List<HighScoreManager.HighScore> scores = HighScoreManager.getHighScores(level);
+        List<HighScoreManager.HighScore> scores = HighScoreManager.getHighScores((model.GameLevel) level);
         String[] columnNames = {"Rank", "Player", "Score", "Attempts", "Date"};
         Object[][] data = new Object[scores.size()][5];
         

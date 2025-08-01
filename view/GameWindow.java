@@ -1,6 +1,12 @@
 package view;
 
 import javax.swing.*;
+
+import controller.GameController;
+import model.GameState;
+import model.Tile;
+import util.SoundManager;
+
 import java.awt.*;
 
 /**
@@ -90,9 +96,9 @@ public class GameWindow extends JFrame {
         subtitleLabel.setForeground(new Color(200, 255, 200));
         
         // Level buttons with underwater styling
-        JButton beginnerButton = createUnderwaterButton("BEGINNER", GameLevel.BEGINNER);
-        JButton intermediateButton = createUnderwaterButton("INTERMEDIATE", GameLevel.INTERMEDIATE);
-        JButton advancedButton = createUnderwaterButton("ADVANCED", GameLevel.ADVANCED);
+        JButton beginnerButton = createUnderwaterButton("BEGINNER", (GameLevel) GameLevel.BEGINNER);
+        JButton intermediateButton = createUnderwaterButton("INTERMEDIATE", (GameLevel) GameLevel.INTERMEDIATE);
+        JButton advancedButton = createUnderwaterButton("ADVANCED", (GameLevel) GameLevel.ADVANCED);
         
         // Instructions panel
         JPanel instructionsPanel = new JPanel();
@@ -133,10 +139,12 @@ public class GameWindow extends JFrame {
         mainPanel.add(menuPanel, "MENU");
     }
     
+
+    /**
     /**
      * Create an underwater-styled button
      */
-    private JButton createUnderwaterButton(String text, GameLevel level) {
+    private JButton createUnderwaterButton(String text, GameLevel advanced) {
         JButton button = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -176,7 +184,8 @@ public class GameWindow extends JFrame {
         
         button.addActionListener(e -> {
             SoundManager.playButtonClickSound();
-            controller.startNewGame(level);
+            GameLevel intermediate = null;
+            controller.startNewGame((model.GameLevel) intermediate);
             cardLayout.show(mainPanel, "GAME");
         });
         
@@ -467,7 +476,7 @@ public class GameWindow extends JFrame {
      * Show high scores dialog
      */
     public void showHighScores() {
-        GameLevel currentLevel = controller.getGameState().getLevel();
+        GameLevel currentLevel = (GameLevel) controller.getGameState().getLevel();
         if (currentLevel != null) {
             HighScoreDialog highScoreDialog = new HighScoreDialog(this, currentLevel);
             highScoreDialog.setVisible(true);
@@ -496,5 +505,15 @@ public class GameWindow extends JFrame {
         } else {
             System.exit(0);
         }
+    }
+
+    public static GameWindow getInstance() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getInstance'");
+    }
+
+    public void updateTile(Object row, Object col) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateTile'");
     }
 } 
