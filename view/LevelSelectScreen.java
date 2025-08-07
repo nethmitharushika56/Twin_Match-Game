@@ -2,15 +2,18 @@ package view;
 
 import controller.GameController;
 
+/**
+ * Simple wrapper for LevelSelectionScreen to preserve naming or abstraction.
+ */
 public class LevelSelectScreen {
 
+    private final LevelSelectionScreen levelSelectionScreen;
+
     public LevelSelectScreen(GameController gameController) {
-        //TODO Auto-generated constructor stub
+        levelSelectionScreen = new LevelSelectionScreen(gameController);
     }
 
-    public void setVisible(boolean b) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setVisible'");
+    public void setVisible(boolean visible) {
+        levelSelectionScreen.setVisible(visible);
     }
-
 }
