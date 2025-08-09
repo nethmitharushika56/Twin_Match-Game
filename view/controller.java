@@ -7,4 +7,7 @@ public class controller {
         throw new UnsupportedOperationException("Unimplemented method 'showGameScreen'");
     }
 
+    public class GameController {
+    }
+
 }
