@@ -42,26 +42,61 @@ public class LevelSelectionScreen extends JFrame {
         backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
         backgroundPanel.setOpaque(false);
 
-        // 🔷 Title Label
-        JLabel titleLabel = new JLabel("Choose Your Level");
-        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 36));
-        titleLabel.setForeground(Color.BLACK);
+        // 🔷 Title Label with dark green gradient & glowing white text
+        JLabel titleLabel = new JLabel("Choose Your Level", SwingConstants.CENTER) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                int w = getWidth();
+                int h = getHeight();
+
+                // Dark green gradient background
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(0x003300),
+                                                           w, h, new Color(0x006600));
+                g2.setPaint(gradient);
+                g2.fillRoundRect(0, 0, w, h, 40, 40);
+
+                // Glow effect for white text
+                g2.setFont(getFont());
+                String text = getText();
+                FontMetrics fm = g2.getFontMetrics();
+                int x = (w - fm.stringWidth(text)) / 2;
+                int y = ((h - fm.getHeight()) / 2) + fm.getAscent();
+
+                g2.setColor(new Color(255, 255, 255, 100));
+                for (int i = 1; i <= 5; i++) {
+                    g2.drawString(text, x - i, y - i);
+                    g2.drawString(text, x + i, y + i);
+                    g2.drawString(text, x - i, y + i);
+                    g2.drawString(text, x + i, y - i);
+                }
+
+                g2.setColor(Color.WHITE);
+                g2.drawString(text, x, y);
+
+                g2.dispose();
+            }
+        };
+        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 42));
+        titleLabel.setPreferredSize(new Dimension(500, 80));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0x00BFFF), 4, true),
-                BorderFactory.createEmptyBorder(10, 20, 10, 20)
-        ));
+        titleLabel.setOpaque(false);
+
         backgroundPanel.add(titleLabel);
         backgroundPanel.add(Box.createVerticalStrut(40));
 
+        // 🔹 Level Panels
         for (GameLevel level : GameLevel.values()) {
             backgroundPanel.add(createStyledPanel(level));
             backgroundPanel.add(Box.createVerticalStrut(20));
         }
 
+        // 🔹 Back Button
         RoundedButton backButton = new RoundedButton("Back to Main Menu");
-        backButton.setPreferredSize(new Dimension(250, 50));
-        backButton.setFont(new Font("Arial", Font.BOLD, 18));
+        backButton.setPreferredSize(new Dimension(280, 70));
+        backButton.setFont(new Font("Arial Black", Font.BOLD, 22));
         backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         backButton.addActionListener(e -> {
             SoundManager.playButtonClickSound();
@@ -82,7 +117,8 @@ public class LevelSelectionScreen extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gp = new GradientPaint(0, 0, new Color(0, 50, 100, 180), 0, getHeight(), new Color(0, 100, 160, 180));
+                GradientPaint gp = new GradientPaint(0, 0, new Color(0x001F4D),
+                                                     0, getHeight(), new Color(0x003366));
                 g2.setPaint(gp);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
                 g2.setColor(new Color(0x00BFFF)); // Blue glow
@@ -137,7 +173,7 @@ public class LevelSelectionScreen extends JFrame {
         }
     }
 
-    // ✅ Custom button
+    // ✅ Custom button with dark blue gradient
     static class RoundedButton extends JButton {
         public RoundedButton(String text) {
             super(text);
@@ -153,14 +189,15 @@ public class LevelSelectionScreen extends JFrame {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            GradientPaint gp = new GradientPaint(0, 0, new Color(0, 170, 255),
-                                                 0, getHeight(), new Color(0, 255, 200));
+            int arc = 50;
+            GradientPaint gp = new GradientPaint(0, 0, new Color(0x001F4D),
+                                                 0, getHeight(), new Color(0x003366));
             g2.setPaint(gp);
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 40, 40);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
 
             g2.setColor(new Color(0x00BFFF));
             g2.setStroke(new BasicStroke(3));
-            g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 40, 40);
+            g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, arc, arc);
 
             g2.dispose();
             super.paintComponent(g);
