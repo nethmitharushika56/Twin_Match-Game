@@ -8,6 +8,7 @@ import model.HighScoreManager;
 import model.Tile;
 import util.SoundManager;
 import view.GameWindow;
+import view.LevelSelectionScreen;
 import view.StartScreen;
 
 import java.awt.Insets;
@@ -204,26 +205,26 @@ public class GameController {
     }
     
 
-	public void startNewGame(model.GameLevel advanced) {
-        GameState gameState = GameState.getInstance();
-        gameState.reset();
-        gameState.setLevel(advanced);
+	public void startNewGame(model.GameLevel level) {
+        // Create a new GameState for the selected level
+        GameState gameState = new GameState(level);
+        gameState.setLevel(level);
     
-        if (advanced == GameLevel.BEGINNER) {
+        if (level == GameLevel.BEGINNER) {
             // 🔹 Open your custom BeginnerLevel JFrame
             new view.BeginnerLevel(this);
             return;
         }
     
-        if (advanced == GameLevel.INTERMEDIATE) {
+        if (level == GameLevel.INTERMEDIATE) {
             gameState.setTotalPairs(8);
             gameState.setTimeLimit(180); // 3 min
             // TODO: new view.IntermediateLevel(this);
             return;
         }
     
-        GameLevel advancedced = null;
-        if (advancedced == GameLevel.ADVANCED) {
+
+        if (level == GameLevel.ADVANCED) {
             gameState.setTotalPairs(12);
             gameState.setTimeLimit(120); // 2 min
             // TODO: new view.AdvancedLevel(this);

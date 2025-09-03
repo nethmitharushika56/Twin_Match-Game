@@ -1,9 +1,9 @@
 package view;
 
 import controller.GameController;
-import controller.LevelSelectionScreen;
+import view.LevelSelectionScreen;
 import util.SoundManager;
-
+import model.GameLevel;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

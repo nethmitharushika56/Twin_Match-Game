@@ -97,9 +97,9 @@ public class GameWindow extends JFrame {
         subtitleLabel.setForeground(new Color(200, 255, 200));
         
         // Level buttons with underwater styling
-        JButton beginnerButton = createUnderwaterButton("BEGINNER", (GameLevel) GameLevel.BEGINNER);
-        JButton intermediateButton = createUnderwaterButton("INTERMEDIATE", (GameLevel) GameLevel.INTERMEDIATE);
-        JButton advancedButton = createUnderwaterButton("ADVANCED", (GameLevel) GameLevel.ADVANCED);
+        JButton beginnerButton = createUnderwaterButton("BEGINNER", GameLevel.BEGINNER);
+        JButton intermediateButton = createUnderwaterButton("INTERMEDIATE", GameLevel.INTERMEDIATE);
+        JButton advancedButton = createUnderwaterButton("ADVANCED", GameLevel.ADVANCED);
         
         // Instructions panel
         JPanel instructionsPanel = new JPanel();
@@ -140,12 +140,10 @@ public class GameWindow extends JFrame {
         mainPanel.add(menuPanel, "MENU");
     }
     
-
-    /**
     /**
      * Create an underwater-styled button
      */
-    private JButton createUnderwaterButton(String text, GameLevel advanced) {
+    private JButton createUnderwaterButton(String text, GameLevel level) {
         JButton button = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -185,7 +183,7 @@ public class GameWindow extends JFrame {
         
         button.addActionListener(e -> {
             SoundManager.playButtonClickSound();
-            controller.startNewGame(advanced);
+            controller.startNewGame(level);
             cardLayout.show(mainPanel, "GAME");
         });
         
@@ -507,14 +505,4 @@ public class GameWindow extends JFrame {
             System.exit(0);
         }
     }
-
-    public static GameWindow getInstance() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getInstance'");
-    }
-
-    public void updateTile(Object row, Object col) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateTile'");
-    }
-} 
+}

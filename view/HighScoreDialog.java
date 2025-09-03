@@ -2,6 +2,7 @@ package view;
 
 import javax.swing.*;
 
+import model.GameLevel;
 import model.HighScoreManager;
 
 import java.awt.*;
