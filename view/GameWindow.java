@@ -3,6 +3,7 @@ package view;
 import javax.swing.*;
 
 import controller.GameController;
+import model.GameLevel;
 import model.GameState;
 import model.Tile;
 import util.SoundManager;
@@ -184,8 +185,7 @@ public class GameWindow extends JFrame {
         
         button.addActionListener(e -> {
             SoundManager.playButtonClickSound();
-            GameLevel intermediate = null;
-            controller.startNewGame((model.GameLevel) intermediate);
+            controller.startNewGame(advanced);
             cardLayout.show(mainPanel, "GAME");
         });
         
@@ -388,9 +388,10 @@ public class GameWindow extends JFrame {
     private void updateTileDisplay(int row, int col, Tile tile) {
         JButton button = tileButtons[row][col];
         GameState gameState = controller.getGameState();
-        boolean isBeginner = gameState.getLevel() == GameLevel.BEGINNER;
-        boolean isAdvanced = gameState.getLevel() == GameLevel.ADVANCED;
-        boolean isIntermediate = gameState.getLevel() == GameLevel.INTERMEDIATE;
+        GameLevel level = gameState.getLevel();
+        boolean isBeginner = level == GameLevel.BEGINNER;
+        boolean isAdvanced = level == GameLevel.ADVANCED;
+        boolean isIntermediate = level == GameLevel.INTERMEDIATE;
         if (button != null) {
             if (tile.isMatched()) {
                 button.setText("✓");
@@ -476,7 +477,7 @@ public class GameWindow extends JFrame {
      * Show high scores dialog
      */
     public void showHighScores() {
-        GameLevel currentLevel = (GameLevel) controller.getGameState().getLevel();
+        GameLevel currentLevel = controller.getGameState().getLevel();
         if (currentLevel != null) {
             HighScoreDialog highScoreDialog = new HighScoreDialog(this, currentLevel);
             highScoreDialog.setVisible(true);

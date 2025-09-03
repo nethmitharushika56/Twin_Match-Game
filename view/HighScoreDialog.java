@@ -14,9 +14,9 @@ import java.util.List;
  */
 public class HighScoreDialog extends JDialog {
     
-    public HighScoreDialog(JFrame parent, GameLevel level) {
-        super(parent, "High Scores - " + level.getDisplayName(), true);
-        initializeDialog(level);
+    public HighScoreDialog(JFrame parent, GameLevel currentLevel) {
+        super(parent, "High Scores - " + currentLevel.getDisplayName(), true);
+        initializeDialog(currentLevel);
     }
     
     private void initializeDialog(GameLevel level) {
