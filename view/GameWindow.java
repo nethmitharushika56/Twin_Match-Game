@@ -3,6 +3,7 @@ package view;
 import javax.swing.*;
 
 import controller.GameController;
+import model.GameLevel;
 import model.GameState;
 import model.Tile;
 import util.SoundManager;
@@ -96,9 +97,9 @@ public class GameWindow extends JFrame {
         subtitleLabel.setForeground(new Color(200, 255, 200));
         
         // Level buttons with underwater styling
-        JButton beginnerButton = createUnderwaterButton("BEGINNER", (GameLevel) GameLevel.BEGINNER);
-        JButton intermediateButton = createUnderwaterButton("INTERMEDIATE", (GameLevel) GameLevel.INTERMEDIATE);
-        JButton advancedButton = createUnderwaterButton("ADVANCED", (GameLevel) GameLevel.ADVANCED);
+        JButton beginnerButton = createUnderwaterButton("BEGINNER", GameLevel.BEGINNER);
+        JButton intermediateButton = createUnderwaterButton("INTERMEDIATE", GameLevel.INTERMEDIATE);
+        JButton advancedButton = createUnderwaterButton("ADVANCED", GameLevel.ADVANCED);
         
         // Instructions panel
         JPanel instructionsPanel = new JPanel();
@@ -139,12 +140,10 @@ public class GameWindow extends JFrame {
         mainPanel.add(menuPanel, "MENU");
     }
     
-
-    /**
     /**
      * Create an underwater-styled button
      */
-    private JButton createUnderwaterButton(String text, GameLevel advanced) {
+    private JButton createUnderwaterButton(String text, GameLevel level) {
         JButton button = new JButton(text) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -184,8 +183,7 @@ public class GameWindow extends JFrame {
         
         button.addActionListener(e -> {
             SoundManager.playButtonClickSound();
-            GameLevel intermediate = null;
-            controller.startNewGame((model.GameLevel) intermediate);
+            controller.startNewGame(level);
             cardLayout.show(mainPanel, "GAME");
         });
         
@@ -388,9 +386,10 @@ public class GameWindow extends JFrame {
     private void updateTileDisplay(int row, int col, Tile tile) {
         JButton button = tileButtons[row][col];
         GameState gameState = controller.getGameState();
-        boolean isBeginner = gameState.getLevel() == GameLevel.BEGINNER;
-        boolean isAdvanced = gameState.getLevel() == GameLevel.ADVANCED;
-        boolean isIntermediate = gameState.getLevel() == GameLevel.INTERMEDIATE;
+        GameLevel level = gameState.getLevel();
+        boolean isBeginner = level == GameLevel.BEGINNER;
+        boolean isAdvanced = level == GameLevel.ADVANCED;
+        boolean isIntermediate = level == GameLevel.INTERMEDIATE;
         if (button != null) {
             if (tile.isMatched()) {
                 button.setText("✓");
@@ -476,7 +475,7 @@ public class GameWindow extends JFrame {
      * Show high scores dialog
      */
     public void showHighScores() {
-        GameLevel currentLevel = (GameLevel) controller.getGameState().getLevel();
+        GameLevel currentLevel = controller.getGameState().getLevel();
         if (currentLevel != null) {
             HighScoreDialog highScoreDialog = new HighScoreDialog(this, currentLevel);
             highScoreDialog.setVisible(true);
@@ -506,14 +505,4 @@ public class GameWindow extends JFrame {
             System.exit(0);
         }
     }
-
-    public static GameWindow getInstance() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getInstance'");
-    }
-
-    public void updateTile(Object row, Object col) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateTile'");
-    }
-} 
+}

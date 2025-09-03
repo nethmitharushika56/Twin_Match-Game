@@ -8,7 +8,7 @@ import model.HighScoreManager;
 import model.Tile;
 import util.SoundManager;
 import view.GameWindow;
-import view.LevelSelectScreen;
+import view.LevelSelectionScreen;
 import view.StartScreen;
 
 import java.awt.Insets;
@@ -146,7 +146,7 @@ public class GameController {
 
         SoundManager.playGameOverSound();
 
-        GameWindow gameWindow = null;
+        GameWindow gameWindow = GameWindow.getInstance();
         if (won && HighScoreManager.isHighScore(gameState.getLevel(), gameState.getScore())) {
             String playerName = JOptionPane.showInputDialog(
                 gameWindow,
@@ -205,26 +205,38 @@ public class GameController {
     }
     
 
-	public void startNewGame(GameLevel level) {
-        GameState gameState = GameState.getInstance();
-        gameState.reset(); // Make sure this resets selections, matches, etc.
-        gameState.setLevel((GameLevel) level);
+	public void startNewGame(model.GameLevel level) {
+        // Create a new GameState for the selected level
+        GameState gameState = new GameState(level);
+        gameState.setLevel(level);
     
         if (level == GameLevel.BEGINNER) {
-            gameState.setTotalPairs(4);
-            gameState.setTimeLimit(0); // no limit
-        } else if (level == GameLevel.INTERMEDIATE) {
-            gameState.setTotalPairs(8);
-            gameState.setTimeLimit(180); // 3 min
-        } else if (level == GameLevel.ADVANCED) {
-            gameState.setTotalPairs(12);
-            gameState.setTimeLimit(120); // 2 min
+            // 🔹 Open your custom BeginnerLevel JFrame
+            new view.BeginnerLevel(this);
+            return;
         }
     
+        if (level == GameLevel.INTERMEDIATE) {
+            gameState.setTotalPairs(8);
+            gameState.setTimeLimit(180); // 3 min
+            // TODO: new view.IntermediateLevel(this);
+            return;
+        }
+    
+
+        if (level == GameLevel.ADVANCED) {
+            gameState.setTotalPairs(12);
+            gameState.setTimeLimit(120); // 2 min
+            // TODO: new view.AdvancedLevel(this);
+            return;
+        }
+    
+        // Fallback: still use GameWindow if nothing matched
         GameWindow gameWindow = new GameWindow(this);
         gameWindow.startNewGame(gameState);
         startTimer();
     }
+    
     
 
     public void showGameScreen(GameLevel level) {
