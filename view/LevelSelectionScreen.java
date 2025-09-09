@@ -3,12 +3,12 @@ package view;
 import controller.GameController;
 import model.GameLevel;
 import util.SoundManager;
-import view.BeginnerLevel;
+
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Clean Level Selection Screen in the view package
+ * Level Selection Screen styled like screenshot
  */
 public class LevelSelectionScreen extends JFrame {
 
@@ -21,49 +21,81 @@ public class LevelSelectionScreen extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Select Difficulty - Twin Match Quest");
+        setTitle("Select Difficulty - Twin Match");
         setSize(700, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
-        mainPanel.setBackground(new Color(0x001F4D));
+        // Background image panel
+        JPanel backgroundPanel = new JPanel() {
+            private final Image bg = new ImageIcon("assets/level_bg.png").getImage(); // put your bg image path
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        backgroundPanel.setLayout(new BoxLayout(backgroundPanel, BoxLayout.Y_AXIS));
+        backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
         // Title
-        JLabel titleLabel = new JLabel("Choose Your Level", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 42));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(titleLabel);
-        mainPanel.add(Box.createVerticalStrut(50));
+        JLabel titleLabel = new JLabel("Choose Your Level", SwingConstants.CENTER) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // Level Buttons
+                String text = getText();
+                Font font = getFont();
+                g2.setFont(font);
+                FontMetrics fm = g2.getFontMetrics(font);
+                int x = (getWidth() - fm.stringWidth(text)) / 2;
+                int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+
+                // White outline
+                g2.setColor(Color.WHITE);
+                for (int dx = -1; dx <= 1; dx++) {
+                    for (int dy = -1; dy <= 1; dy++) {
+                        if (dx != 0 || dy != 0) {
+                            g2.drawString(text, x + dx, y + dy);
+                        }
+                    }
+                }
+
+                // Main text
+                g2.setColor(getForeground());
+                g2.drawString(text, x, y);
+
+                g2.dispose();
+            }
+        };
+        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 40));
+        titleLabel.setForeground(Color.BLUE.darker());
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        backgroundPanel.add(titleLabel);
+        backgroundPanel.add(Box.createVerticalStrut(50));
+
+        // Level buttons (Beginner, Intermediate, Advanced)
         for (GameLevel level : GameLevel.values()) {
             JButton levelButton = createStyledButton(level.getDisplayName(), level);
-            mainPanel.add(levelButton);
-
-            JLabel descLabel = new JLabel("<html><div style='color:white; font-size:14px;'>" +
-                    level.getDescription() + "</div></html>", SwingConstants.CENTER);
-            descLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            mainPanel.add(descLabel);
-
-            mainPanel.add(Box.createVerticalStrut(20));
+            backgroundPanel.add(levelButton);
+            backgroundPanel.add(Box.createVerticalStrut(30));
         }
 
         // Back button
         JButton backButton = createStyledButton("Back to Main Menu", null);
+        backButton.setMaximumSize(new Dimension(400, 60));
         backButton.addActionListener(e -> {
             SoundManager.playButtonClickSound();
             controller.showMainMenu();
             dispose();
         });
-        mainPanel.add(Box.createVerticalStrut(30));
-        mainPanel.add(backButton);
+        backgroundPanel.add(Box.createVerticalStrut(40));
+        backgroundPanel.add(backButton);
 
-        setContentPane(mainPanel);
+        setContentPane(backgroundPanel);
     }
 
     private JButton createStyledButton(String text, GameLevel level) {
@@ -73,13 +105,13 @@ public class LevelSelectionScreen extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                int arc = 50;
+                int arc = 40;
                 int w = getWidth();
                 int h = getHeight();
 
                 // Gradient fill
-                GradientPaint gradient = new GradientPaint(0, 0, new Color(0x001F4D),
-                        0, h, new Color(0x003366));
+                GradientPaint gradient = new GradientPaint(0, 0, new Color(0x000033),
+                        0, h, new Color(0x001F4D));
                 g2.setPaint(gradient);
                 g2.fillRoundRect(0, 0, w, h, arc, arc);
 
@@ -93,7 +125,7 @@ public class LevelSelectionScreen extends JFrame {
             }
         };
 
-        button.setFont(new Font("Arial Black", Font.BOLD, 24));
+        button.setFont(new Font("Arial Black", Font.BOLD, 26));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
@@ -105,7 +137,6 @@ public class LevelSelectionScreen extends JFrame {
         if (level != null) {
             button.addActionListener(e -> {
                 SoundManager.playButtonClickSound();
-                System.out.println("DEBUG: " + level + " clicked");
                 controller.startNewGame(level);
                 dispose();
             });

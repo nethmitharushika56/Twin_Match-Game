@@ -357,7 +357,7 @@ public class GameWindow extends JFrame {
     /**
      * Update the display of a specific tile
      */
-    public void updateTile(int row, int col) {
+    public void updateTile(Object row, Object col) {
         GameState gameState = controller.getGameState();
         Tile tile = gameState.getTile(row, col);
         if (tile != null) {
@@ -365,7 +365,12 @@ public class GameWindow extends JFrame {
         }
     }
     
-    /**
+    private void updateTileDisplay(Object row, Object col, Tile tile) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'updateTileDisplay'");
+	}
+
+	/**
      * Update all tiles display
      */
     public void updateAllTiles() {
@@ -504,5 +509,10 @@ public class GameWindow extends JFrame {
         } else {
             System.exit(0);
         }
+    }
+
+    public static GameWindow getInstance() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getInstance'");
     }
 }

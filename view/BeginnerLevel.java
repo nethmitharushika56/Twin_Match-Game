@@ -1,9 +1,8 @@
 package view;
 
 import controller.GameController;
-import view.LevelSelectionScreen;
 import util.SoundManager;
-import model.GameLevel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -13,32 +12,44 @@ public class BeginnerLevel extends JFrame {
     private final int GRID_SIZE = 4; // 4x4 grid
     private final JButton[] tiles = new JButton[GRID_SIZE * GRID_SIZE];
     private final String BACK_IMAGE = "assets/tiles_back.png"; // face-down image
-    private String[] tileImages; // holds the randomized images
+    private String[] tileImages; // randomized images for 16 slots
     private JButton firstSelected = null;
     private JButton secondSelected = null;
     private javax.swing.Timer flipBackTimer;
     private int matchedPairs = 0;
 
-    private final GameController controller; // Needed to pass to LevelSelectionScreen
+    private final GameController controller;
 
     public BeginnerLevel(GameController controller) {
         this.controller = controller;
 
         setTitle("Beginner Level - Twin Match Quest");
-        setSize(700, 700);
+        setSize(800, 850);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
 
-        // Top control buttons panel
+        // ---------- Background Panel ----------
+        JPanel backgroundPanel = new JPanel() {
+            private Image bg = new ImageIcon("assets/beginner_bg.png").getImage();
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        backgroundPanel.setLayout(new BorderLayout());
+        setContentPane(backgroundPanel);
+
+        // ---------- Top Control Panel ----------
         JPanel controlPanel = new JPanel();
         controlPanel.setOpaque(false);
 
         JButton pauseBtn = createCustomButton("Pause");
-        JButton backBtn = createCustomButton("Back to Level Selection");
+        JButton backBtn = createCustomButton("Back");
 
-        pauseBtn.setPreferredSize(new Dimension(320, 80));
-        backBtn.setPreferredSize(new Dimension(320, 80));
+        pauseBtn.setPreferredSize(new Dimension(220, 60));
+        backBtn.setPreferredSize(new Dimension(220, 60));
 
         pauseBtn.addActionListener(e -> {
             SoundManager.playButtonClickSound();
@@ -48,25 +59,50 @@ public class BeginnerLevel extends JFrame {
         backBtn.addActionListener(e -> {
             SoundManager.playButtonClickSound();
             dispose();
-            // Redirect back to LevelSelectionScreen
             new LevelSelectionScreen(controller);
         });
 
         controlPanel.add(pauseBtn);
         controlPanel.add(backBtn);
-        add(controlPanel, BorderLayout.NORTH);
+        backgroundPanel.add(controlPanel, BorderLayout.NORTH);
 
-        // Game grid panel
+        // ---------- Game Grid ----------
         JPanel gridPanel = new JPanel(new GridLayout(GRID_SIZE, GRID_SIZE, 5, 5));
-        add(gridPanel, BorderLayout.CENTER);
+        gridPanel.setOpaque(false);
+        backgroundPanel.add(gridPanel, BorderLayout.CENTER);
 
         // Prepare randomized tiles
         tileImages = prepareRandomImages();
 
         for (int i = 0; i < tiles.length; i++) {
-            tiles[i] = new JButton();
+            tiles[i] = new JButton() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    int w = getWidth();
+                    int h = getHeight();
+                    int arc = 20;
+
+                    GradientPaint gradient = new GradientPaint(0, 0, new Color(173, 216, 230),
+                                                               w, h, Color.WHITE);
+                    g2.setPaint(gradient);
+                    g2.fillRoundRect(0, 0, w, h, arc, arc);
+
+                    g2.setColor(Color.WHITE);
+                    g2.setStroke(new BasicStroke(3f));
+                    g2.drawRoundRect(1, 1, w - 3, h - 3, arc, arc);
+
+                    super.paintComponent(g);
+                    g2.dispose();
+                }
+            };
+
             tiles[i].setFocusable(false);
-            tiles[i].setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+            tiles[i].setContentAreaFilled(false);
+            tiles[i].setOpaque(false);
+            tiles[i].setBorder(BorderFactory.createEmptyBorder());
             tiles[i].setIcon(getScaledIcon(BACK_IMAGE));
 
             final int index = i;
@@ -77,30 +113,31 @@ public class BeginnerLevel extends JFrame {
         setVisible(true);
     }
 
+    // ---------- Prepare 16 images (8 pairs) ----------
     private String[] prepareRandomImages() {
         String[] availableImages = {
-            "assets/tiles_img1.jpg",
-            "assets/tiles_img2.jpg",
-            "assets/tiles_img3.jpg",
-            "assets/tiles_img4.jpg",
-            "assets/tiles_img5.jpg",
-            "assets/tiles_img6.png",
-            "assets/tiles_img7.png",
-            "assets/tiles_img8.jpg"
+            "assets/tiles/img1.jpg",
+            "assets/tiles/img2.png",
+            "assets/tiles/img3.png",
+            "assets/tiles/img11.png",
+            "assets/tiles/img5.jpg",
+            "assets/tiles/img6.jpg",
+            "assets/tiles/img7.png",
+            "assets/tiles/img8.png"
         };
 
         ArrayList<String> imagesList = new ArrayList<>();
-        for (int i = 0; i < 8; i++) { // 8 pairs for 16 tiles
-            imagesList.add(availableImages[i]);
-            imagesList.add(availableImages[i]);
+        for (String img : availableImages) {
+            imagesList.add(img);
+            imagesList.add(img);
         }
-
         Collections.shuffle(imagesList);
         return imagesList.toArray(new String[0]);
     }
 
+    // ---------- Handle tile clicks ----------
     private void handleTileClick(int index) {
-        if (firstSelected != null && secondSelected != null) return; // already two selected
+        if (firstSelected != null && secondSelected != null) return;
 
         tiles[index].setIcon(getScaledIcon(tileImages[index]));
 
@@ -150,10 +187,7 @@ public class BeginnerLevel extends JFrame {
         return new ImageIcon(scaled);
     }
 
-    /**
-     * Creates a custom glowing button style: dark blue fill, light blue border,
-     * white text, rounded corners.
-     */
+    // ---------- Custom gradient buttons ----------
     private JButton createCustomButton(String text) {
         JButton button = new JButton(text) {
             @Override
@@ -161,19 +195,17 @@ public class BeginnerLevel extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                int arc = 50;
+                int arc = 40;
                 int w = getWidth();
                 int h = getHeight();
 
-                // Dark blue gradient fill
                 GradientPaint gradient = new GradientPaint(0, 0, new Color(0x001F4D),
                                                            w, h, new Color(0x001A3D));
                 g2.setPaint(gradient);
                 g2.fillRoundRect(0, 0, w, h, arc, arc);
 
-                // Light blue border
                 g2.setColor(new Color(0x00BFFF));
-                g2.setStroke(new BasicStroke(4f));
+                g2.setStroke(new BasicStroke(3f));
                 g2.drawRoundRect(2, 2, w - 5, h - 5, arc, arc);
 
                 super.paintComponent(g);
@@ -181,7 +213,7 @@ public class BeginnerLevel extends JFrame {
             }
         };
 
-        button.setFont(new Font("Arial Black", Font.BOLD, 24));
+        button.setFont(new Font("Arial Black", Font.BOLD, 20));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
