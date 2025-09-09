@@ -219,7 +219,7 @@ public class GameController {
         if (level == GameLevel.INTERMEDIATE) {
             gameState.setTotalPairs(8);
             gameState.setTimeLimit(180); // 3 min
-            // TODO: new view.IntermediateLevel(this);
+            new view.IntermediateLevel(this);
             return;
         }
     
