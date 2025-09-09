@@ -227,7 +227,7 @@ public class GameController {
         if (level == GameLevel.ADVANCED) {
             gameState.setTotalPairs(12);
             gameState.setTimeLimit(120); // 2 min
-            // TODO: new view.AdvancedLevel(this);
+            new view.AdvancedLevel(this);
             return;
         }
     
