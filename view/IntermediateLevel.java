@@ -134,11 +134,11 @@ public class IntermediateLevel extends JFrame {
             "assets/tiles/img1.jpg",
             "assets/tiles/img2.png",
             "assets/tiles/img3.png",
-            "assets/tiles/img4.jpg",
+            "assets/tiles/img4.jpeg",
             "assets/tiles/img5.jpg",
-            "assets/tiles/img6.png",
+            "assets/tiles/img6.jpg",
             "assets/tiles/img7.png",
-            "assets/tiles/img8.jpg"
+            "assets/tiles/img8.png"
         };
 
         ArrayList<String> imagesList = new ArrayList<>();

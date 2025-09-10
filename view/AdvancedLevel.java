@@ -128,30 +128,33 @@ public class AdvancedLevel extends JFrame {
         setVisible(true);
     }
 
-    // ---------- Prepare 12 pairs + 1 duplicate for 25 tiles ----------
+    // ---------- Prepare 12 pairs + special tile (img10) ----------
     private String[] prepareRandomImages() {
         String[] availableImages = {
             "assets/tiles/img1.jpg",
             "assets/tiles/img2.png",
             "assets/tiles/img3.png",
-            "assets/tiles/img4.jpg",
+            "assets/tiles/img4.jpeg",
             "assets/tiles/img5.jpg",
-            "assets/tiles/img6.png",
+            "assets/tiles/img6.jpg",
             "assets/tiles/img7.png",
-            "assets/tiles/img8.jpg",
-            "assets/tiles/img9.png",
-            "assets/tiles/img10.jpg",
+            "assets/tiles/img8.png",
+            "assets/tiles/img9.jpeg",
+            "assets/tiles/img10.jpeg", // special tile
             "assets/tiles/img11.png",
             "assets/tiles/img12.jpg"
         };
 
         ArrayList<String> imagesList = new ArrayList<>();
         for (String img : availableImages) {
-            imagesList.add(img);
-            imagesList.add(img); // duplicate pair
+            if (!img.contains("img10")) { 
+                imagesList.add(img);
+                imagesList.add(img); // duplicate pair
+            }
         }
-        // Add one more duplicate to reach 25 tiles
-        imagesList.add(availableImages[0]);
+
+        // Add special tile img10
+        imagesList.add("assets/tiles/img10.jpeg");
 
         Collections.shuffle(imagesList);
         return imagesList.toArray(new String[0]);
@@ -163,6 +166,21 @@ public class AdvancedLevel extends JFrame {
 
         tiles[index].setIcon(getScaledIcon(tileImages[index]));
 
+        // ✅ Special bonus tile (img10)
+        if (tileImages[index].contains("img10")) {
+            remainingSeconds += 15;
+            timerLabel.setText(String.format("Time: %02d:%02d", remainingSeconds / 60, remainingSeconds % 60));
+
+            // disappear after short delay
+            javax.swing.Timer bonusTimer = new javax.swing.Timer(600, e -> {
+                tiles[index].setVisible(false);
+            });
+            bonusTimer.setRepeats(false);
+            bonusTimer.start();
+            return; // stop normal matching logic
+        }
+
+        // ---------- Normal pair logic ----------
         if (firstSelected == null) {
             firstSelected = tiles[index];
         } else if (firstSelected != tiles[index]) {
