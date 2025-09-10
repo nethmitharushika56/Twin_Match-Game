@@ -20,6 +20,8 @@ public class BeginnerLevel extends JFrame {
 
     private final GameController controller;
 
+    private boolean allowClicks = false; // disable clicks during countdown
+
     public BeginnerLevel(GameController controller) {
         this.controller = controller;
 
@@ -86,7 +88,7 @@ public class BeginnerLevel extends JFrame {
                     int arc = 20;
 
                     GradientPaint gradient = new GradientPaint(0, 0, new Color(173, 216, 230),
-                                                               w, h, Color.WHITE);
+                            w, h, Color.WHITE);
                     g2.setPaint(gradient);
                     g2.fillRoundRect(0, 0, w, h, arc, arc);
 
@@ -106,24 +108,69 @@ public class BeginnerLevel extends JFrame {
             tiles[i].setIcon(getScaledIcon(BACK_IMAGE));
 
             final int index = i;
-            tiles[i].addActionListener(e -> handleTileClick(index));
+            tiles[i].addActionListener(e -> {
+                if (allowClicks) handleTileClick(index);
+            });
+
             gridPanel.add(tiles[i]);
         }
 
+        // ---------- Start Countdown ----------
+        startCountdown(() -> allowClicks = true); // enable clicks after countdown
+
         setVisible(true);
+    }
+
+    // ---------- Countdown ----------
+    private void startCountdown(Runnable onComplete) {
+        allowClicks = false;
+
+        JLayeredPane layeredPane = getLayeredPane();
+
+        JLabel countdownLabel = new JLabel("", SwingConstants.CENTER);
+        countdownLabel.setFont(new Font("Arial Black", Font.BOLD, 120));
+        countdownLabel.setForeground(new Color(0x00008B)); // dark blue
+        countdownLabel.setBounds(0, 0, getWidth(), getHeight());
+        countdownLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        countdownLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+        layeredPane.add(countdownLabel, JLayeredPane.POPUP_LAYER);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+
+        int[] count = {3};
+        javax.swing.Timer countdownTimer = new javax.swing.Timer(1000, null);
+        countdownTimer.addActionListener(e -> {
+            if (count[0] > 0) {
+                countdownLabel.setText(String.valueOf(count[0]));
+                count[0]--;
+            } else {
+                countdownLabel.setText("Go!");
+                ((javax.swing.Timer) e.getSource()).stop();
+
+                new javax.swing.Timer(500, ev -> {
+                    layeredPane.remove(countdownLabel);
+                    layeredPane.revalidate();
+                    layeredPane.repaint();
+
+                    onComplete.run();
+                }).start();
+            }
+        });
+        countdownTimer.start();
     }
 
     // ---------- Prepare 16 images (8 pairs) ----------
     private String[] prepareRandomImages() {
         String[] availableImages = {
-            "assets/tiles/img1.jpg",
-            "assets/tiles/img2.png",
-            "assets/tiles/img3.png",
-            "assets/tiles/img11.png",
-            "assets/tiles/img5.jpg",
-            "assets/tiles/img6.jpg",
-            "assets/tiles/img7.png",
-            "assets/tiles/img8.png"
+                "assets/tiles/img1.jpg",
+                "assets/tiles/img2.png",
+                "assets/tiles/img3.png",
+                "assets/tiles/img11.png",
+                "assets/tiles/img5.jpg",
+                "assets/tiles/img6.jpg",
+                "assets/tiles/img7.png",
+                "assets/tiles/img8.png"
         };
 
         ArrayList<String> imagesList = new ArrayList<>();
@@ -174,9 +221,7 @@ public class BeginnerLevel extends JFrame {
 
     private String getTileImage(JButton button) {
         for (int i = 0; i < tiles.length; i++) {
-            if (tiles[i] == button) {
-                return tileImages[i];
-            }
+            if (tiles[i] == button) return tileImages[i];
         }
         return "";
     }
@@ -200,7 +245,7 @@ public class BeginnerLevel extends JFrame {
                 int h = getHeight();
 
                 GradientPaint gradient = new GradientPaint(0, 0, new Color(0x001F4D),
-                                                           w, h, new Color(0x001A3D));
+                        w, h, new Color(0x001A3D));
                 g2.setPaint(gradient);
                 g2.fillRoundRect(0, 0, w, h, arc, arc);
 
