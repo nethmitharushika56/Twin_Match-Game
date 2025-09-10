@@ -323,7 +323,7 @@ public class GameState {
         throw new UnsupportedOperationException("Unimplemented method 'getTile'");
     }
 
-    public void decrementTime() {
+    public int decrementTime() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'decrementTime'");
     }

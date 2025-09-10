@@ -40,6 +40,8 @@ public class LevelSelectionScreen extends JFrame {
         backgroundPanel.setLayout(new BoxLayout(backgroundPanel, BoxLayout.Y_AXIS));
         backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
+        
+        
         // Title
         JLabel titleLabel = new JLabel("Choose Your Level", SwingConstants.CENTER) {
             @Override
@@ -83,6 +85,19 @@ public class LevelSelectionScreen extends JFrame {
             backgroundPanel.add(levelButton);
             backgroundPanel.add(Box.createVerticalStrut(30));
         }
+
+        // ... inside initializeUI() after adding level buttons
+
+// Settings button
+JButton settingsButton = createStyledButton("Settings", null);
+settingsButton.setMaximumSize(new Dimension(400, 60));
+settingsButton.addActionListener(e -> {
+    SoundManager.playButtonClickSound();
+    controller.showSettings(); // make sure you have this method in your GameController
+});
+backgroundPanel.add(Box.createVerticalStrut(30)); // spacing before Settings
+backgroundPanel.add(settingsButton);
+
 
         // Back button
         JButton backButton = createStyledButton("Back to Main Menu", null);
@@ -144,4 +159,4 @@ public class LevelSelectionScreen extends JFrame {
 
         return button;
     }
-}
+}   
