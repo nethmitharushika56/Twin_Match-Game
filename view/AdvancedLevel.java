@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class AdvancedLevel extends JFrame {
-    private final int GRID_SIZE = 5; // 5x5 grid
+    private final int GRID_SIZE = 5; // 5x5 grid = 25 tiles
     private final JButton[] tiles = new JButton[GRID_SIZE * GRID_SIZE];
     private final String BACK_IMAGE = "assets/tiles_back.png";
     private String[] tileImages;
@@ -21,7 +21,10 @@ public class AdvancedLevel extends JFrame {
     private final GameController controller;
     private JLabel timerLabel;
     private javax.swing.Timer gameTimer;
-    private int remainingSeconds = 120; // 2 minutes countdown
+    private int remainingSeconds = 60; // 1 minute countdown
+
+    // Controls whether player clicks are processed (disabled during initial countdown)
+    private boolean allowClicks = false;
 
     public AdvancedLevel(GameController controller) {
         this.controller = controller;
@@ -68,8 +71,8 @@ public class AdvancedLevel extends JFrame {
             new LevelSelectionScreen(controller);
         });
 
-        // Timer label
-        timerLabel = new JLabel("Time: 02:00");
+        // Timer label (reflect actual remainingSeconds)
+        timerLabel = new JLabel(formatTime(remainingSeconds));
         timerLabel.setFont(new Font("Arial Black", Font.BOLD, 24));
         timerLabel.setForeground(Color.WHITE);
 
@@ -123,12 +126,70 @@ public class AdvancedLevel extends JFrame {
             gridPanel.add(tiles[i]);
         }
 
-        startTimer(); // start countdown
-
+        // Show frame first so layered pane sizes are correct for countdown overlay
         setVisible(true);
+
+        // Start 3..2..1..Go countdown, then enable clicks and start the game timer
+        startCountdown(() -> {
+            allowClicks = true;
+            timerLabel.setText(formatTime(remainingSeconds)); // reset label to 01:00
+            startTimer();
+        });
     }
 
-    // ---------- Prepare 12 pairs + special tile (img10) ----------
+    private String formatTime(int totalSeconds) {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    private void pauseTimer() {
+        if (gameTimer != null && gameTimer.isRunning()) {
+            gameTimer.stop();
+        }
+    }
+
+    // ---------- Countdown ----------
+    private void startCountdown(Runnable onComplete) {
+        JLayeredPane layeredPane = getLayeredPane();
+
+        JLabel countdownLabel = new JLabel("", SwingConstants.CENTER);
+        countdownLabel.setFont(new Font("Arial Black", Font.BOLD, 120));
+        countdownLabel.setForeground(new Color(0x00008B)); // dark blue
+
+        Dimension size = getContentPane().getSize();
+        countdownLabel.setBounds(0, 0, size.width, size.height);
+        countdownLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        countdownLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+        layeredPane.add(countdownLabel, JLayeredPane.POPUP_LAYER);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+
+        int[] count = {3};
+        javax.swing.Timer countdownTimer = new javax.swing.Timer(1000, null);
+        countdownTimer.addActionListener(e -> {
+            if (count[0] > 0) {
+                countdownLabel.setText(String.valueOf(count[0]));
+                count[0]--;
+            } else {
+                countdownLabel.setText("Go!");
+                ((javax.swing.Timer) e.getSource()).stop();
+
+                javax.swing.Timer goTimer = new javax.swing.Timer(500, ev -> {
+                    layeredPane.remove(countdownLabel);
+                    layeredPane.revalidate();
+                    layeredPane.repaint();
+                    onComplete.run();
+                });
+                goTimer.setRepeats(false);
+                goTimer.start();
+            }
+        });
+        countdownTimer.start();
+    }
+
+    // ---------- Prepare 12 pairs + 3 special tiles ----------
     private String[] prepareRandomImages() {
         String[] availableImages = {
             "assets/tiles/img1.jpg",
@@ -147,13 +208,15 @@ public class AdvancedLevel extends JFrame {
 
         ArrayList<String> imagesList = new ArrayList<>();
         for (String img : availableImages) {
-            if (!img.contains("img10")) { 
+            if (!img.contains("img10")) {
                 imagesList.add(img);
                 imagesList.add(img); // duplicate pair
             }
         }
 
-        // Add special tile img10
+        // Add special tile (img10) three times to fill 25 total
+        imagesList.add("assets/tiles/img10.jpeg");
+        imagesList.add("assets/tiles/img10.jpeg");
         imagesList.add("assets/tiles/img10.jpeg");
 
         Collections.shuffle(imagesList);
@@ -162,38 +225,48 @@ public class AdvancedLevel extends JFrame {
 
     // ---------- Tile click handler ----------
     private void handleTileClick(int index) {
+        if (!allowClicks) return;
+        if (!tiles[index].isVisible()) return;
         if (firstSelected != null && secondSelected != null) return;
 
         tiles[index].setIcon(getScaledIcon(tileImages[index]));
 
-        // ✅ Special bonus tile (img10)
+        // Special bonus tile
         if (tileImages[index].contains("img10")) {
-            remainingSeconds += 15;
-            timerLabel.setText(String.format("Time: %02d:%02d", remainingSeconds / 60, remainingSeconds % 60));
+            tiles[index].setEnabled(false);
 
-            // disappear after short delay
+            remainingSeconds += 15;
+            timerLabel.setText(formatTime(remainingSeconds));
+
             javax.swing.Timer bonusTimer = new javax.swing.Timer(600, e -> {
                 tiles[index].setVisible(false);
+                tiles[index].setEnabled(true);
             });
             bonusTimer.setRepeats(false);
             bonusTimer.start();
-            return; // stop normal matching logic
+            return;
         }
 
-        // ---------- Normal pair logic ----------
         if (firstSelected == null) {
             firstSelected = tiles[index];
         } else if (firstSelected != tiles[index]) {
             secondSelected = tiles[index];
 
-            if (getTileImage(firstSelected).equals(getTileImage(secondSelected))) {
+            String img1 = getTileImage(firstSelected);
+            String img2 = getTileImage(secondSelected);
+
+            if (img1.equals(img2)) {
                 javax.swing.Timer removeTimer = new javax.swing.Timer(500, e -> {
                     firstSelected.setVisible(false);
                     secondSelected.setVisible(false);
                     firstSelected = null;
                     secondSelected = null;
                     matchedPairs++;
-                    if (matchedPairs == 12) { // 12 pairs
+
+                    int specialCount = countOccurrencesOf("img10");
+                    int totalPairsNeeded = (tiles.length - specialCount) / 2;
+
+                    if (matchedPairs >= totalPairsNeeded) {
                         if (gameTimer != null) gameTimer.stop();
                         JOptionPane.showMessageDialog(AdvancedLevel.this, "You win!");
                     }
@@ -202,8 +275,8 @@ public class AdvancedLevel extends JFrame {
                 removeTimer.start();
             } else {
                 flipBackTimer = new javax.swing.Timer(800, e -> {
-                    firstSelected.setIcon(getScaledIcon(BACK_IMAGE));
-                    secondSelected.setIcon(getScaledIcon(BACK_IMAGE));
+                    if (firstSelected != null) firstSelected.setIcon(getScaledIcon(BACK_IMAGE));
+                    if (secondSelected != null) secondSelected.setIcon(getScaledIcon(BACK_IMAGE));
                     firstSelected = null;
                     secondSelected = null;
                 });
@@ -211,6 +284,14 @@ public class AdvancedLevel extends JFrame {
                 flipBackTimer.start();
             }
         }
+    }
+
+    private int countOccurrencesOf(String needle) {
+        int count = 0;
+        for (String s : tileImages) {
+            if (s.contains(needle)) count++;
+        }
+        return count;
     }
 
     private String getTileImage(JButton button) {
@@ -263,11 +344,16 @@ public class AdvancedLevel extends JFrame {
 
     // ---------- Timer ----------
     private void startTimer() {
+        if (gameTimer != null && gameTimer.isRunning()) {
+            gameTimer.stop();
+        }
+
+        timerLabel.setText(formatTime(remainingSeconds));
+
         gameTimer = new javax.swing.Timer(1000, e -> {
             remainingSeconds--;
-            int minutes = remainingSeconds / 60;
-            int seconds = remainingSeconds % 60;
-            timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
+            timerLabel.setText(formatTime(remainingSeconds));
+            System.out.println("Timer tick: " + remainingSeconds); // debug
 
             if (remainingSeconds <= 0) {
                 gameTimer.stop();
@@ -276,10 +362,7 @@ public class AdvancedLevel extends JFrame {
                 new LevelSelectionScreen(controller);
             }
         });
+        gameTimer.setRepeats(true);
         gameTimer.start();
-    }
-
-    private void pauseTimer() {
-        if (gameTimer != null) gameTimer.stop();
     }
 }

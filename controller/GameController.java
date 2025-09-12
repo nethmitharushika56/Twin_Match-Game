@@ -3,6 +3,7 @@ package controller;
 import javax.swing.JFrame;
 
 import model.GameLevel;
+import model.GameState;
 import view.AdvancedLevel;
 import view.BeginnerLevel;
 import view.IntermediateLevel;
@@ -60,6 +61,26 @@ public class GameController {
                 // Fallback to start screen if unknown
                 startGame();
         }
+    }
+
+    public void onTileSelected(int finalRow, int finalCol) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'onTileSelected'");
+    }
+
+    public GameState getGameState() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getGameState'");
+    }
+
+    public void resumeGame() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'resumeGame'");
+    }
+
+    public void pauseGame() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'pauseGame'");
     }
 }
 
