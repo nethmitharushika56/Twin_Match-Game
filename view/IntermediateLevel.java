@@ -2,6 +2,7 @@ package view;
 
 import controller.GameController;
 import util.SoundManager;
+import util.AnimationManager; // 🔥 Import fireworks panel
 
 import javax.swing.*;
 import java.awt.*;
@@ -219,7 +220,7 @@ public class IntermediateLevel extends JFrame {
                     matchedPairs++;
                     if (matchedPairs == 8) {
                         if (gameTimer != null) gameTimer.stop();
-                        JOptionPane.showMessageDialog(IntermediateLevel.this, "You win!");
+                        showWinAnimation(); // 🎆 show fireworks
                     }
                 });
                 removeTimer.setRepeats(false);
@@ -235,6 +236,23 @@ public class IntermediateLevel extends JFrame {
                 flipBackTimer.start();
             }
         }
+    }
+
+    // ---------- Fireworks on Win ----------
+    private void showWinAnimation() {
+        SwingUtilities.invokeLater(() -> {
+            AnimationManager.FireworksPanel fireworks = new AnimationManager.FireworksPanel();
+            JLayeredPane layeredPane = getLayeredPane();
+            fireworks.setBounds(0, 0, getWidth(), getHeight());
+            layeredPane.add(fireworks, JLayeredPane.DRAG_LAYER);
+
+            JOptionPane.showMessageDialog(this, "🎉 You Win! 🎉");
+
+            fireworks.stop();
+            layeredPane.remove(fireworks);
+            layeredPane.revalidate();
+            layeredPane.repaint();
+        });
     }
 
     private String getTileImage(JButton button) {

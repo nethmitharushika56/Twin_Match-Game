@@ -2,9 +2,11 @@ package view;
 
 import controller.GameController;
 import util.SoundManager;
+import util.AnimationManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -268,7 +270,21 @@ public class AdvancedLevel extends JFrame {
 
                     if (matchedPairs >= totalPairsNeeded) {
                         if (gameTimer != null) gameTimer.stop();
-                        JOptionPane.showMessageDialog(AdvancedLevel.this, "You win!");
+
+                        // 🎉 Show fireworks overlay
+                        SwingUtilities.invokeLater(() -> {
+                            AnimationManager.FireworksPanel fireworks = new AnimationManager.FireworksPanel();
+                            JLayeredPane layeredPane = getLayeredPane();
+                            fireworks.setBounds(0, 0, getWidth(), getHeight());
+                            layeredPane.add(fireworks, JLayeredPane.DRAG_LAYER);
+
+                            JOptionPane.showMessageDialog(this, "🎉 You Win! 🎉");
+
+                            fireworks.stop();
+                            layeredPane.remove(fireworks);
+                            layeredPane.revalidate();
+                            layeredPane.repaint();
+                        });
                     }
                 });
                 removeTimer.setRepeats(false);
@@ -301,10 +317,22 @@ public class AdvancedLevel extends JFrame {
         return "";
     }
 
+    // ---------- High-quality scaling ----------
     private ImageIcon getScaledIcon(String imagePath) {
         ImageIcon icon = new ImageIcon(imagePath);
-        Image scaled = icon.getImage().getScaledInstance(130, 130, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaled);
+
+        int size = imagePath.contains("img10") ? 100 : 130; // smaller sharper clock
+        Image img = icon.getImage();
+
+        BufferedImage resized = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resized.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawImage(img, 0, 0, size, size, null);
+        g2.dispose();
+
+        return new ImageIcon(resized);
     }
 
     private JButton createCustomButton(String text) {
