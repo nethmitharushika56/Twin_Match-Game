@@ -332,4 +332,9 @@ public class GameState {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'reset'");
     }
+
+    public void handleTileSelection(int row, int col) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'handleTileSelection'");
+    }
 } 

@@ -84,13 +84,13 @@ public class GameController {
 
         switch (level) {
             case BEGINNER:
-                currentFrame = new BeginnerLevel(this, currentState);
+                currentFrame = new BeginnerLevel(this);
                 break;
             case INTERMEDIATE:
-                currentFrame = new IntermediateLevel(this, currentState);
+                currentFrame = new IntermediateLevel(this);
                 break;
             case ADVANCED:
-                currentFrame = new AdvancedLevel(this, currentState);
+                currentFrame = new AdvancedLevel(this);
                 break;
             default:
                 showMainMenu();
