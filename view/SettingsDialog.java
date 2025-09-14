@@ -1,5 +1,7 @@
 package view;
 
+import util.SoundManager;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,7 +14,7 @@ public class SettingsDialog extends JDialog {
     private boolean settingsChanged = false;
 
     public SettingsDialog(JFrame parent) {
-        super(parent, "Game Settings", true);
+        super(parent, "Game Settings", true); // modal dialog
         initializeDialog();
     }
 
@@ -27,13 +29,14 @@ public class SettingsDialog extends JDialog {
 
         // Title
         JLabel titleLabel = new JLabel("Game Settings");
-        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 26));
+        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 28));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setForeground(new Color(70, 130, 180));
 
         // Sound settings
         JPanel soundPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         soundPanel.setOpaque(false);
+
         soundCheckBox = new JCheckBox("Enable Sound Effects");
         soundCheckBox.setSelected(SoundManager.isSoundEnabled());
         soundCheckBox.setFont(new Font("Arial", Font.PLAIN, 16));
@@ -47,47 +50,30 @@ public class SettingsDialog extends JDialog {
         soundPanel.add(muteCheckBox);
 
         // Profile button
-        JPanel profilePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        profilePanel.setOpaque(false);
         JButton profileButton = new JButton("Profile");
         profileButton.setFont(new Font("Arial", Font.PLAIN, 16));
         profileButton.addActionListener(e -> showProfileDialog());
-        profilePanel.add(profileButton);
 
-        // Gameplay instructions button
-        JPanel instructionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        instructionsPanel.setOpaque(false);
+        // Instructions button
         JButton instructionsButton = new JButton("Gameplay Instructions");
         instructionsButton.setFont(new Font("Arial", Font.PLAIN, 16));
         instructionsButton.addActionListener(e -> showInstructionsDialog());
-        instructionsPanel.add(instructionsButton);
 
-        // Privacy & Policies button
-        JPanel privacyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        privacyPanel.setOpaque(false);
+        // Privacy button
         JButton privacyButton = new JButton("Privacy & Policies");
         privacyButton.setFont(new Font("Arial", Font.PLAIN, 16));
         privacyButton.addActionListener(e -> showPrivacyDialog());
-        privacyPanel.add(privacyButton);
 
-        // Buttons
+        // Buttons panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         buttonPanel.setOpaque(false);
 
         JButton saveButton = new JButton("Save");
-        saveButton.setFont(new Font("Arial", Font.BOLD, 14));
-        saveButton.setBackground(new Color(100, 149, 237));
-        saveButton.setForeground(Color.WHITE);
-        saveButton.setFocusPainted(false);
-        saveButton.setBorderPainted(false);
+        styleButton(saveButton, new Color(100, 149, 237));
         saveButton.addActionListener(e -> saveSettings());
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.setFont(new Font("Arial", Font.BOLD, 14));
-        cancelButton.setBackground(new Color(220, 20, 60));
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setFocusPainted(false);
-        cancelButton.setBorderPainted(false);
+        styleButton(cancelButton, new Color(220, 20, 60));
         cancelButton.addActionListener(e -> dispose());
 
         buttonPanel.add(saveButton);
@@ -98,17 +84,18 @@ public class SettingsDialog extends JDialog {
         mainPanel.add(Box.createVerticalStrut(30));
         mainPanel.add(soundPanel);
         mainPanel.add(Box.createVerticalStrut(20));
-        mainPanel.add(profilePanel);
+        mainPanel.add(profileButton);
         mainPanel.add(Box.createVerticalStrut(10));
-        mainPanel.add(instructionsPanel);
+        mainPanel.add(instructionsButton);
         mainPanel.add(Box.createVerticalStrut(10));
-        mainPanel.add(privacyPanel);
+        mainPanel.add(privacyButton);
         mainPanel.add(Box.createVerticalStrut(40));
         mainPanel.add(buttonPanel);
 
         setContentPane(mainPanel);
     }
 
+    /** Save settings to SoundManager */
     private void saveSettings() {
         SoundManager.setSoundEnabled(soundCheckBox.isSelected() && !muteCheckBox.isSelected());
         settingsChanged = true;
@@ -119,16 +106,33 @@ public class SettingsDialog extends JDialog {
         return settingsChanged;
     }
 
-    // Dummy dialogs for profile, instructions, privacy
+    /** Dummy dialogs for other sections */
     private void showProfileDialog() {
-        JOptionPane.showMessageDialog(this, "User Profile:\nName: Player1\nLevel: 5", "Profile", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this,
+                "User Profile:\nName: Player1\nLevel: 5",
+                "Profile", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void showInstructionsDialog() {
-        JOptionPane.showMessageDialog(this, "Gameplay Instructions:\n- Move with arrow keys\n- Collect coins\n- Avoid enemies", "Instructions", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this,
+                "Gameplay Instructions:\n- Move with arrow keys\n- Collect coins\n- Avoid enemies",
+                "Instructions", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void showPrivacyDialog() {
-        JOptionPane.showMessageDialog(this, "Privacy & Policies:\n- Your data is safe.\n- We do not share information.", "Privacy & Policies", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this,
+                "Privacy & Policies:\n- Your data is safe.\n- We do not share information.",
+                "Privacy & Policies", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /** Helper to style buttons */
+    private void styleButton(JButton button, Color bgColor) {
+        button.setFont(new Font("Arial Black", Font.BOLD, 14));
+        button.setBackground(bgColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setPreferredSize(new Dimension(100, 35));
     }
 }

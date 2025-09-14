@@ -12,13 +12,17 @@ import view.SettingsDialog;
 import view.StartScreen;
 
 /**
- * Central UI controller: routes between screens and starts levels.
+ * Central UI controller: routes between screens and starts/resumes levels.
  */
 public class GameController {
 
+    private GameState currentState;  // holds current game progress
+    private JFrame currentFrame;     // keeps track of the active game window
+
     /** Launch the start screen. */
     public void startGame() {
-        new StartScreen(this);
+        closeCurrentFrame();
+        currentFrame = new StartScreen(this);
     }
 
     /** Show the main menu (alias of start). */
@@ -28,12 +32,13 @@ public class GameController {
 
     /** Open the level selection screen. */
     public void showLevelSelection() {
-        new LevelSelectionScreen(this);
+        closeCurrentFrame();
+        currentFrame = new LevelSelectionScreen(this);
     }
 
     /** Open the settings dialog (no specific parent). */
     public void showSettings() {
-        SettingsDialog dialog = new SettingsDialog((JFrame) null);
+        SettingsDialog dialog = new SettingsDialog(currentFrame);
         dialog.setVisible(true);
     }
 
@@ -47,41 +52,75 @@ public class GameController {
     public void startNewGame(GameLevel level) {
         if (level == null) return;
 
+        closeCurrentFrame();
         switch (level) {
             case BEGINNER:
-                new BeginnerLevel(this);
+                currentFrame = new BeginnerLevel(this);
                 break;
             case INTERMEDIATE:
-                new IntermediateLevel(this);
+                currentFrame = new IntermediateLevel(this);
                 break;
             case ADVANCED:
-                new AdvancedLevel(this);
+                currentFrame = new AdvancedLevel(this);
                 break;
             default:
-                // Fallback to start screen if unknown
                 startGame();
+        }
+
+        // Create a new game state
+        currentState = new GameState(level);
+    }
+
+    /** Resume game if there is a saved state. */
+    public void resumeGame() {
+        if (currentState == null) {
+            // No saved game → go back to level selection
+            showLevelSelection();
+            return;
+        }
+
+        closeCurrentFrame();
+        GameLevel level = currentState.getLevel();
+
+        switch (level) {
+            case BEGINNER:
+                currentFrame = new BeginnerLevel(this, currentState);
+                break;
+            case INTERMEDIATE:
+                currentFrame = new IntermediateLevel(this, currentState);
+                break;
+            case ADVANCED:
+                currentFrame = new AdvancedLevel(this, currentState);
+                break;
+            default:
+                showMainMenu();
         }
     }
 
-    public void onTileSelected(int finalRow, int finalCol) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'onTileSelected'");
-    }
-
-    public GameState getGameState() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getGameState'");
-    }
-
-    public void resumeGame() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'resumeGame'");
-    }
-
+    /** Pause the game (simply save state, keep currentFrame open). */
     public void pauseGame() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'pauseGame'");
+        if (currentState != null) {
+            currentState.setPaused(true);
+        }
+    }
+
+    /** Called when a tile is selected. */
+    public void onTileSelected(int row, int col) {
+        if (currentState != null) {
+            currentState.handleTileSelection(row, col);
+        }
+    }
+
+    /** Returns the active game state. */
+    public GameState getGameState() {
+        return currentState;
+    }
+
+    /** Utility: Close the current frame before switching screens. */
+    private void closeCurrentFrame() {
+        if (currentFrame != null) {
+            currentFrame.dispose();
+            currentFrame = null;
+        }
     }
 }
-
-

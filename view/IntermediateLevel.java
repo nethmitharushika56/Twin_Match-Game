@@ -21,7 +21,10 @@ public class IntermediateLevel extends JFrame {
     private final GameController controller;
     private JLabel timerLabel;
     private javax.swing.Timer gameTimer;
-    private int remainingSeconds = 60; // 2 minutes countdown
+    private int remainingSeconds = 60; // 1 minute countdown
+
+    // NEW: block clicks until countdown finishes
+    private boolean allowClicks = false;
 
     public IntermediateLevel(GameController controller) {
         this.controller = controller;
@@ -123,9 +126,54 @@ public class IntermediateLevel extends JFrame {
             gridPanel.add(tiles[i]);
         }
 
-        startTimer(); // start countdown
-
+        // Show window before countdown overlay
         setVisible(true);
+
+        // Start countdown before allowing play
+        startCountdown(() -> {
+            allowClicks = true;
+            startTimer();
+        });
+    }
+
+    // ---------- Countdown ----------
+    private void startCountdown(Runnable onComplete) {
+        JLayeredPane layeredPane = getLayeredPane();
+
+        JLabel countdownLabel = new JLabel("", SwingConstants.CENTER);
+        countdownLabel.setFont(new Font("Arial Black", Font.BOLD, 120));
+        countdownLabel.setForeground(new Color(0x00008B));
+
+        Dimension size = getContentPane().getSize();
+        countdownLabel.setBounds(0, 0, size.width, size.height);
+        countdownLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        countdownLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+        layeredPane.add(countdownLabel, JLayeredPane.POPUP_LAYER);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+
+        int[] count = {3};
+        javax.swing.Timer countdownTimer = new javax.swing.Timer(1000, null);
+        countdownTimer.addActionListener(e -> {
+            if (count[0] > 0) {
+                countdownLabel.setText(String.valueOf(count[0]));
+                count[0]--;
+            } else {
+                countdownLabel.setText("Go!");
+                countdownTimer.stop();
+
+                javax.swing.Timer goTimer = new javax.swing.Timer(500, ev -> {
+                    layeredPane.remove(countdownLabel);
+                    layeredPane.revalidate();
+                    layeredPane.repaint();
+                    onComplete.run();
+                });
+                goTimer.setRepeats(false);
+                goTimer.start();
+            }
+        });
+        countdownTimer.start();
     }
 
     // ---------- Prepare 8 pairs (16 tiles) ----------
@@ -152,6 +200,7 @@ public class IntermediateLevel extends JFrame {
 
     // ---------- Tile click handler ----------
     private void handleTileClick(int index) {
+        if (!allowClicks) return; // block until countdown finishes
         if (firstSelected != null && secondSelected != null) return;
 
         tiles[index].setIcon(getScaledIcon(tileImages[index]));
@@ -168,7 +217,7 @@ public class IntermediateLevel extends JFrame {
                     firstSelected = null;
                     secondSelected = null;
                     matchedPairs++;
-                    if (matchedPairs == 8) { // 8 pairs
+                    if (matchedPairs == 8) {
                         if (gameTimer != null) gameTimer.stop();
                         JOptionPane.showMessageDialog(IntermediateLevel.this, "You win!");
                     }
@@ -258,4 +307,3 @@ public class IntermediateLevel extends JFrame {
         if (gameTimer != null) gameTimer.stop();
     }
 }
-
