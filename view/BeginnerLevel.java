@@ -230,7 +230,6 @@ public class BeginnerLevel extends JFrame {
         ImageIcon icon = new ImageIcon(imagePath);
         Image scaled = icon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
         return new ImageIcon(scaled);
-    }
 
     // ---------- Custom gradient buttons ----------
     private JButton createCustomButton(String text) {
@@ -264,7 +263,22 @@ public class BeginnerLevel extends JFrame {
         button.setContentAreaFilled(false);
         button.setBorderPainted(false);
         button.setOpaque(false);
+// WIN condition
+if (matchedPairs == 8) {
+    // Show fireworks overlay
+    SwingUtilities.invokeLater(() -> {
+        AnimationManager.FireworksPanel fireworks = new AnimationManager.FireworksPanel();
+        JLayeredPane layeredPane = getLayeredPane();
+        fireworks.setBounds(0, 0, getWidth(), getHeight());
+        layeredPane.add(fireworks, JLayeredPane.DRAG_LAYER);
 
-        return button;
-    }
+        JOptionPane.showMessageDialog(this, "🎉 You Win! 🎉");
+
+        // remove fireworks after message
+        fireworks.stop();
+        layeredPane.remove(fireworks);
+        layeredPane.revalidate();
+        layeredPane.repaint();
+    });
 }
+
