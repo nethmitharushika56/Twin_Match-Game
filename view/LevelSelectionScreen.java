@@ -108,7 +108,7 @@ backgroundPanel.add(settingsButton);
 
 
         // Back button
-        JButton backButton = createStyledButton("Back to Main Menu", null);
+        JButton backButton = createStyledButton("Back to Home Page", null);
         backButton.setMaximumSize(new Dimension(400, 60));
         backButton.addActionListener(e -> {
             SoundManager.playButtonClickSound();

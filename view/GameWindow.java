@@ -109,7 +109,6 @@ public class GameWindow extends JFrame {
         
         JTextArea instructionsArea = new JTextArea();
         instructionsArea.setText("How to Play:\n" +
-                "• Click on tiles to reveal Squid Game characters\n" +
                 "• Find matching pairs to clear the board\n" +
                 "• Complete the game with as few attempts as possible\n" +
                 "• Beginner: 9 tiles, no time limit\n" +
@@ -279,21 +278,10 @@ public class GameWindow extends JFrame {
             showSettings();
         });
         
-        JButton highScoresButton = new JButton("High Scores");
-        highScoresButton.setFont(new Font("Arial", Font.BOLD, 14));
-        highScoresButton.setBackground(new Color(255, 215, 0));
-        highScoresButton.setForeground(Color.BLACK);
-        highScoresButton.setFocusPainted(false);
-        highScoresButton.setBorderPainted(false);
-        highScoresButton.addActionListener(e -> {
-            SoundManager.playButtonClickSound();
-            showHighScores();
-        });
         
         controlPanel.add(pauseButton);
         controlPanel.add(menuButton);
         controlPanel.add(settingsButton);
-        controlPanel.add(highScoresButton);
         
         gamePanel.add(controlPanel, BorderLayout.SOUTH);
     }
@@ -476,16 +464,6 @@ public class GameWindow extends JFrame {
         settingsDialog.setVisible(true);
     }
     
-    /**
-     * Show high scores dialog
-     */
-    public void showHighScores() {
-        GameLevel currentLevel = controller.getGameState().getLevel();
-        if (currentLevel != null) {
-            HighScoreDialog highScoreDialog = new HighScoreDialog(this, currentLevel);
-            highScoreDialog.setVisible(true);
-        }
-    }
     
     /**
      * Show game over dialog
