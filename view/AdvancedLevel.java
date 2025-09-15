@@ -203,7 +203,7 @@ public class AdvancedLevel extends JFrame {
             "assets/tiles/img7.png",
             "assets/tiles/img8.png",
             "assets/tiles/img9.jpeg",
-            "assets/tiles/img10.jpeg", // special tile
+            "assets/tiles/img10.png", // special tile
             "assets/tiles/img11.png",
             "assets/tiles/img12.jpg"
         };
@@ -217,9 +217,9 @@ public class AdvancedLevel extends JFrame {
         }
 
         // Add special tile (img10) three times to fill 25 total
-        imagesList.add("assets/tiles/img10.jpeg");
-        imagesList.add("assets/tiles/img10.jpeg");
-        imagesList.add("assets/tiles/img10.jpeg");
+        imagesList.add("assets/tiles/img10.png");
+        imagesList.add("assets/tiles/img10.png");
+        imagesList.add("assets/tiles/img10.png");
 
         Collections.shuffle(imagesList);
         return imagesList.toArray(new String[0]);
@@ -320,10 +320,11 @@ public class AdvancedLevel extends JFrame {
     // ---------- High-quality scaling ----------
     private ImageIcon getScaledIcon(String imagePath) {
         ImageIcon icon = new ImageIcon(imagePath);
-
-        int size = imagePath.contains("img10") ? 100 : 130; // smaller sharper clock
+    
+        // Make img10 same size as others (130) for clarity
+        int size = 130;
         Image img = icon.getImage();
-
+    
         BufferedImage resized = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = resized.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
@@ -331,9 +332,10 @@ public class AdvancedLevel extends JFrame {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.drawImage(img, 0, 0, size, size, null);
         g2.dispose();
-
+    
         return new ImageIcon(resized);
     }
+    
 
     private JButton createCustomButton(String text) {
         JButton button = new JButton(text) {

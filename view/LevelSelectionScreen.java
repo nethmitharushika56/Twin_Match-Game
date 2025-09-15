@@ -41,38 +41,46 @@ public class LevelSelectionScreen extends JFrame {
         backgroundPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
         
-        
         // Title
-        JLabel titleLabel = new JLabel("Choose Your Level", SwingConstants.CENTER) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+JLabel titleLabel = new JLabel("Choose Your Level", SwingConstants.CENTER) {
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                String text = getText();
-                Font font = getFont();
-                g2.setFont(font);
-                FontMetrics fm = g2.getFontMetrics(font);
-                int x = (getWidth() - fm.stringWidth(text)) / 2;
-                int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+        String text = getText();
+        Font font = getFont();
+        g2.setFont(font);
+        FontMetrics fm = g2.getFontMetrics(font);
+        int textWidth = fm.stringWidth(text);
+        int textHeight = fm.getHeight();
+        int x = (getWidth() - textWidth) / 2;
+        int y = (getHeight() - textHeight) / 2 + fm.getAscent();
 
-                // White outline
-                g2.setColor(Color.WHITE);
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dy = -1; dy <= 1; dy++) {
-                        if (dx != 0 || dy != 0) {
-                            g2.drawString(text, x + dx, y + dy);
-                        }
-                    }
+        // 🔵 Semi-transparent background
+        int padding = 20;
+        g2.setColor(new Color(0, 0, 0, 120)); // black with transparency
+        g2.fillRoundRect(x - padding / 2, y - fm.getAscent() - padding / 2,
+                textWidth + padding, textHeight + padding, 25, 25);
+
+        // White outline
+        g2.setColor(Color.WHITE);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx != 0 || dy != 0) {
+                    g2.drawString(text, x + dx, y + dy);
                 }
-
-                // Main text
-                g2.setColor(getForeground());
-                g2.drawString(text, x, y);
-
-                g2.dispose();
             }
-        };
+        }
+
+        // Main text
+        g2.setColor(getForeground());
+        g2.drawString(text, x, y);
+
+        g2.dispose();
+    }
+};
+
         titleLabel.setFont(new Font("Arial Black", Font.BOLD, 40));
         titleLabel.setForeground(Color.BLUE.darker());
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

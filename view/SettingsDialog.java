@@ -8,8 +8,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Modern animated Settings Dialog
- * Clean UI without emojis
+ * Modern Settings Dialog with gradient background and styled buttons
  */
 public class SettingsDialog extends JDialog {
     private AnimatedToggle soundToggle;
@@ -25,21 +24,20 @@ public class SettingsDialog extends JDialog {
         setLocationRelativeTo(getParent());
         setResizable(false);
 
-        // Neon gradient panel
+        // Gradient background
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                int width = getWidth();
-                int height = getHeight();
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
                 GradientPaint gp = new GradientPaint(
-                        0, 0, new Color(25, 25, 112),   // dark blue
-                        0, height, new Color(0, 191, 255) // neon cyan
+                        0, 0, new Color(0, 0, 139),
+                        0, getHeight(), new Color(173, 216, 230)
                 );
                 g2d.setPaint(gp);
-                g2d.fillRect(0, 0, width, height);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
         mainPanel.setLayout(new BorderLayout());
@@ -52,52 +50,45 @@ public class SettingsDialog extends JDialog {
         titleLabel.setBorder(new EmptyBorder(10, 0, 20, 0));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Side buttons
+        // Left panel with vertical items
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setOpaque(false);
-
-        JButton profileButton = createModernButton("Profile", e -> showProfileDialog());
-        JButton instructionsButton = createModernButton("Instructions", e -> showInstructionsDialog());
-        JButton privacyButton = createModernButton("Policy", e -> showPrivacyDialog());
-
-        leftPanel.add(profileButton);
-        leftPanel.add(Box.createVerticalStrut(12));
-        leftPanel.add(instructionsButton);
-        leftPanel.add(Box.createVerticalStrut(12));
-        leftPanel.add(privacyButton);
-
-        mainPanel.add(leftPanel, BorderLayout.WEST);
-
-        // Center content
-        JPanel centerPanel = new JPanel();
-        centerPanel.setOpaque(false);
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        leftPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         // Sound row
         JPanel soundRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         soundRow.setOpaque(false);
-
         JLabel soundLabel = new JLabel("Sound");
-        soundLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        soundLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         soundLabel.setForeground(Color.WHITE);
-
         soundToggle = new AnimatedToggle(SoundManager.isSoundEnabled());
         soundRow.add(soundLabel);
         soundRow.add(Box.createHorizontalStrut(15));
         soundRow.add(soundToggle);
 
-        centerPanel.add(soundRow);
+        // Buttons
+        JButton profileButton = createRoundButton("Profile", e -> showProfileDialog());
+        JButton instructionsButton = createRoundButton("Instructions", e -> showInstructionsDialog());
+        JButton privacyButton = createRoundButton("Policy", e -> showPrivacyDialog());
 
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        // Add to left panel
+        leftPanel.add(soundRow);
+        leftPanel.add(Box.createVerticalStrut(20));
+        leftPanel.add(profileButton);
+        leftPanel.add(Box.createVerticalStrut(15));
+        leftPanel.add(instructionsButton);
+        leftPanel.add(Box.createVerticalStrut(15));
+        leftPanel.add(privacyButton);
 
-        // Bottom save/cancel
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+
+        // Bottom Save/Cancel row
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 15));
         bottomPanel.setOpaque(false);
 
-        JButton saveButton = createFilledButton("Save", new Color(0, 191, 255), e -> saveSettings());
-        JButton cancelButton = createFilledButton("Cancel", new Color(255, 69, 58), e -> dispose());
+        JButton saveButton = createFilledButton("Save", new Color(30, 144, 255), e -> saveSettings()); // light blue
+        JButton cancelButton = createFilledButton("Cancel", new Color(220, 20, 60), e -> dispose());   // red
 
         bottomPanel.add(saveButton);
         bottomPanel.add(cancelButton);
@@ -107,16 +98,22 @@ public class SettingsDialog extends JDialog {
         setContentPane(mainPanel);
     }
 
-    private Object showInstructionsDialog() {
-        throw new UnsupportedOperationException("Unimplemented method 'showInstructionsDialog'");
+    private void showInstructionsDialog() {
+        JOptionPane.showMessageDialog(this,
+                "📘 Game Instructions\n\n1. Start the game using the Play button.\n2. Use arrow keys / controls to move.\n3. Score points by completing objectives.\n4. You can pause from the menu.\n\nEnjoy playing!",
+                "Instructions", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private Object showProfileDialog() {
-        throw new UnsupportedOperationException("Unimplemented method 'showProfileDialog'");
+    private void showProfileDialog() {
+        JOptionPane.showMessageDialog(this,
+                "👤 Profile Settings\n\n• Username: Player1\n• Level: Beginner\n• High Score: 0\n\nProfile customization will be available soon.",
+                "Profile", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private Object showPrivacyDialog() {
-        throw new UnsupportedOperationException("Unimplemented method 'showPrivacyDialog'");
+    private void showPrivacyDialog() {
+        JOptionPane.showMessageDialog(this,
+                "🔒 Privacy Policy\n\nThis game respects your privacy.\n• No personal data is collected.\n• Sound and game settings are stored locally.\n• No internet connection is required.\n\nBy playing, you agree to fair use.",
+                "Policy", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void saveSettings() {
@@ -131,26 +128,15 @@ public class SettingsDialog extends JDialog {
 
     /* ------------------ Helper Methods ------------------ */
 
-    private JButton createModernButton(String text, java.awt.event.ActionListener action) {
+    private JButton createRoundButton(String text, java.awt.event.ActionListener action) {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
-        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2, true));
+        button.setBorder(new RoundedBorder(15, Color.WHITE));
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        // Hover effect
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                button.setForeground(new Color(0, 255, 200));
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                button.setForeground(Color.WHITE);
-            }
-        });
+        button.setPreferredSize(new Dimension(140, 40));
 
         button.addActionListener(action);
         return button;
@@ -161,9 +147,23 @@ public class SettingsDialog extends JDialog {
         button.setFont(new Font("Segoe UI Black", Font.BOLD, 14));
         button.setForeground(Color.WHITE);
         button.setBackground(bg);
+        button.setOpaque(true);
         button.setFocusPainted(false);
         button.setBorder(new RoundedBorder(12, Color.WHITE));
         button.setPreferredSize(new Dimension(120, 40));
+
+        // Hover darker
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(bg.darker());
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(bg);
+            }
+        });
+
         button.addActionListener(action);
         return button;
     }
@@ -187,9 +187,7 @@ public class SettingsDialog extends JDialog {
             });
         }
 
-        public boolean isOn() {
-            return on;
-        }
+        public boolean isOn() { return on; }
 
         private void toggle() {
             on = !on;
@@ -198,10 +196,8 @@ public class SettingsDialog extends JDialog {
             timer = new Timer(15, e -> {
                 if (on && anim < 1f) anim += 0.1f;
                 else if (!on && anim > 0f) anim -= 0.1f;
-
                 anim = Math.max(0f, Math.min(1f, anim));
                 repaint();
-
                 if (anim == 0f || anim == 1f) ((Timer) e.getSource()).stop();
             });
             timer.start();
@@ -215,15 +211,12 @@ public class SettingsDialog extends JDialog {
             int width = getWidth();
             int height = getHeight();
 
-            // Track
             g2.setColor(new Color(200, 200, 200, 120));
             g2.fillRoundRect(0, 0, width, height, height, height);
 
-            // Fill
             g2.setColor(new Color(0, 191, 255));
             g2.fillRoundRect(0, 0, (int) (width * anim), height, height, height);
 
-            // Knob
             int knobSize = height - 4;
             int x = (int) ((width - knobSize - 4) * anim) + 2;
             g2.setColor(Color.WHITE);
@@ -247,10 +240,8 @@ public class SettingsDialog extends JDialog {
         public Insets getBorderInsets(Component c) {
             return new Insets(6, 6, 6, 6);
         }
-
         @Override
         public boolean isBorderOpaque() { return false; }
-
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
             Graphics2D g2 = (Graphics2D) g.create();
