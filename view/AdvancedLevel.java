@@ -31,7 +31,7 @@ public class AdvancedLevel extends JFrame {
     public AdvancedLevel(GameController controller) {
         this.controller = controller;
 
-        setTitle("Advanced Level - Twin Match Quest");
+        setTitle("Advanced Level - Twin Match");
         setSize(900, 950);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

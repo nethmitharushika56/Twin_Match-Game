@@ -30,7 +30,7 @@ public class IntermediateLevel extends JFrame {
     public IntermediateLevel(GameController controller) {
         this.controller = controller;
 
-        setTitle("Intermediate Level - Twin Match Quest");
+        setTitle("Intermediate Level - Twin Match");
         setSize(800, 850);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

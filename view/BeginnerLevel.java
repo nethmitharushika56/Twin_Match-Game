@@ -26,7 +26,7 @@ public class BeginnerLevel extends JFrame {
     public BeginnerLevel(GameController controller) {
         this.controller = controller;
 
-        setTitle("Beginner Level - Twin Match Quest");
+        setTitle("Beginner Level - Twin Match");
         setSize(800, 850);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -20,7 +20,7 @@ public class SettingsDialog extends JDialog {
     }
 
     private void initializeDialog() {
-        setSize(520, 460);
+        setSize(560, 460);
         setLocationRelativeTo(getParent());
         setResizable(false);
 
@@ -64,8 +64,8 @@ public class SettingsDialog extends JDialog {
 
         // Buttons
         JButton profileButton = createRoundButton("Profile", e -> showProfileDialog());
-        JButton instructionsButton = createRoundButton("Instructions", e -> showInstructionsDialog());
-        JButton privacyButton = createRoundButton("Policy", e -> showPrivacyDialog());
+        JButton instructionsButton = createRoundButton("Instructions to Play", e -> showInstructionsDialog());
+        JButton privacyButton = createRoundButton("Privacy and Policy", e -> showPrivacyDialog());
 
         // Add all items to left panel in one vertical column
         leftPanel.add(soundLabel);
@@ -177,7 +177,7 @@ public class SettingsDialog extends JDialog {
         AnimatedToggle(boolean initial) {
             this.on = initial;
             this.anim = initial ? 1f : 0f;
-            setPreferredSize(new Dimension(35, 18));
+            setPreferredSize(new Dimension(20, 10));
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
