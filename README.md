@@ -26,12 +26,12 @@ Twin Match Quest is a classic memory matching game where players flip over tiles
 
 ### 2. Intermediate
 - **Total Pairs**: 8 (16 tiles)
-- **Time Limit**: ✅ 1 minutes
+- **Time Limit**: ✅ 1 minute
 - **Description**: Moderate difficulty with added time pressure
 
 ### 3. Advanced
 - **Total Pairs**: 11 pairs and 3 extra tiles (25 tiles)
-- **Time Limit**: ✅ 1 minutes (Extra 15 mins will be added when you click a bonus tile)
+- **Time Limit**: ✅ 1 minute (Extra 15 mins will be added when you click a bonus tile)
 - **Description**: Challenging level for experienced players with a strict time limit
 
 ## 🎨 Design & Aesthetics
@@ -55,7 +55,7 @@ Twin Match Quest is a classic memory matching game where players flip over tiles
 ## 📁 Project Structure
 
 ```
-Twin_Match-Game-1/
+Twin_Match-Game/
 │
 ├── controller/
 │   └── GameController.java           ← Main game controller
