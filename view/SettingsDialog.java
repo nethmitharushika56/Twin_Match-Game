@@ -272,7 +272,7 @@ public class SettingsDialog extends JDialog {
         AnimatedToggle(boolean initial) {
             this.on = initial;
             this.anim = initial ? 1f : 0f;
-            setPreferredSize(new Dimension(20, 10));
+            setPreferredSize(new Dimension(45, 22));
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
