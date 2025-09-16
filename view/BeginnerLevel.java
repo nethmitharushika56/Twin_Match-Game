@@ -5,6 +5,8 @@ import util.AnimationManager;
 import util.SoundManager;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -210,7 +212,7 @@ public class BeginnerLevel extends JFrame {
                             fireworks.setBounds(0, 0, getWidth(), getHeight());
                             layeredPane.add(fireworks, JLayeredPane.DRAG_LAYER);
 
-                            JOptionPane.showMessageDialog(this, "🎉 You Win! 🎉");
+                            showWinDialog();
 
                             // remove fireworks after message
                             fireworks.stop();
@@ -281,6 +283,62 @@ public class BeginnerLevel extends JFrame {
         button.setBorderPainted(false);
         button.setOpaque(false);
 
+        return button;
+    }
+    
+    private void showWinDialog() {
+        JDialog winDialog = new JDialog(this, "Congratulations!", true);
+        winDialog.setSize(400, 200);
+        winDialog.setLocationRelativeTo(this);
+        winDialog.setResizable(false);
+        
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        panel.setBackground(new Color(240, 248, 255));
+        
+        // Title
+        JLabel titleLabel = new JLabel("You Win!", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(0, 100, 0));
+        panel.add(titleLabel, BorderLayout.NORTH);
+        
+        // Message
+        JLabel messageLabel = new JLabel("Congratulations!!", SwingConstants.CENTER);
+        messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        panel.add(messageLabel, BorderLayout.CENTER);
+        
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setOpaque(false);
+        
+        JButton replayButton = createDialogButton("Replay", new Color(34, 139, 34), e -> {
+            winDialog.dispose();
+            dispose();
+            new BeginnerLevel(controller);
+        });
+        
+        JButton backButton = createDialogButton("Main Menu", new Color(220, 20, 60), e -> {
+            winDialog.dispose();
+            dispose();
+            new LevelSelectionScreen(controller);
+        });
+        
+        buttonPanel.add(replayButton);
+        buttonPanel.add(backButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        winDialog.setContentPane(panel);
+        winDialog.setVisible(true);
+    }
+    
+    private JButton createDialogButton(String text, Color color, java.awt.event.ActionListener action) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setForeground(Color.BLACK);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setPreferredSize(new Dimension(150, 35));
+        button.addActionListener(action);
         return button;
     }
 }
