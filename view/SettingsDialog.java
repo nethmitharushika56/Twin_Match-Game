@@ -24,20 +24,115 @@ public class SettingsDialog extends JDialog {
         setLocationRelativeTo(getParent());
         setResizable(false);
 
-        // Gradient background
+        // Dynamic animated background
         JPanel mainPanel = new JPanel() {
+            private float animationTime = 0;
+            private Timer animationTimer;
+            
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+                int width = getWidth();
+                int height = getHeight();
+                
+                // Animated gradient colors
+                float hue1 = (float) (0.6 + 0.1 * Math.sin(animationTime * 0.5));
+                float hue2 = (float) (0.7 + 0.1 * Math.sin(animationTime * 0.3 + Math.PI/3));
+                
+                Color color1 = Color.getHSBColor(hue1, 0.8f, 0.6f);
+                Color color2 = Color.getHSBColor(hue2, 0.6f, 0.9f);
+                
+                // Animated gradient direction
+                float gradientAngle = (float) (Math.sin(animationTime * 0.2) * 0.5 + 0.5);
                 GradientPaint gp = new GradientPaint(
-                        0, 0, new Color(0, 0, 139),
-                        0, getHeight(), new Color(173, 216, 230)
+                        0, 0, color1,
+                        width * gradientAngle, height * (1 - gradientAngle), color2
                 );
+                
                 g2d.setPaint(gp);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
+                g2d.fillRect(0, 0, width, height);
+                
+                // Enhanced floating particles with glow
+                for (int i = 0; i < 20; i++) {
+                    float x = (float) (width * (0.1 + 0.8 * (Math.sin(animationTime + i) + 1) / 2));
+                    float y = (float) (height * (0.1 + 0.8 * (Math.cos(animationTime * 0.7 + i * 0.5) + 1) / 2));
+                    float size = (float) (4 + 3 * Math.sin(animationTime * 2 + i));
+                    
+                    // Outer glow
+                    g2d.setColor(new Color(255, 255, 255, 80));
+                    g2d.fillOval((int)x - 2, (int)y - 2, (int)size + 4, (int)size + 4);
+                    
+                    // Bright center
+                    g2d.setColor(new Color(255, 255, 255, 200));
+                    g2d.fillOval((int)x, (int)y, (int)size, (int)size);
+                }
+                
+                // Enhanced floating bubbles with rainbow colors
+                Color[] bubbleColors = {
+                    new Color(255, 100, 100, 150), // Bright Red
+                    new Color(100, 255, 100, 150), // Bright Green
+                    new Color(100, 100, 255, 150), // Bright Blue
+                    new Color(255, 255, 100, 150), // Bright Yellow
+                    new Color(255, 100, 255, 150), // Bright Magenta
+                    new Color(100, 255, 255, 150), // Bright Cyan
+                    new Color(255, 150, 100, 150)  // Bright Orange
+                };
+                
+                for (int i = 0; i < 12; i++) {
+                    Color bubbleColor = bubbleColors[i % bubbleColors.length];
+                    float x = (float) (width * (0.05 + 0.9 * (Math.sin(animationTime * 0.3 + i * 0.8) + 1) / 2));
+                    float y = (float) (height * (0.05 + 0.9 * (Math.cos(animationTime * 0.4 + i * 0.6) + 1) / 2));
+                    float size = (float) (12 + 8 * Math.sin(animationTime * 1.5 + i));
+                    
+                    // Outer glow
+                    g2d.setColor(new Color(bubbleColor.getRed(), bubbleColor.getGreen(), bubbleColor.getBlue(), 60));
+                    g2d.fillOval((int)x - 4, (int)y - 4, (int)size + 8, (int)size + 8);
+                    
+                    // Main bubble
+                    g2d.setColor(bubbleColor);
+                    g2d.fillOval((int)x, (int)y, (int)size, (int)size);
+                }
+                
+                // Floating sparkles
+                g2d.setColor(new Color(255, 215, 0, 180)); // Gold
+                for (int i = 0; i < 8; i++) {
+                    float x = (float) (width * (0.15 + 0.7 * (Math.sin(animationTime * 0.8 + i * 1.2) + 1) / 2));
+                    float y = (float) (height * (0.15 + 0.7 * (Math.cos(animationTime * 0.6 + i * 0.9) + 1) / 2));
+                    float size = (float) (6 + 4 * Math.sin(animationTime * 3 + i));
+                    
+                    // Draw star shape
+                    int centerX = (int)x;
+                    int centerY = (int)y;
+                    int[] xPoints = {centerX, centerX + (int)size, centerX + (int)(size/2), centerX, centerX - (int)(size/2)};
+                    int[] yPoints = {centerY - (int)size, centerY, centerY + (int)(size/2), centerY + (int)(size/2), centerY + (int)(size/2)};
+                    g2d.fillPolygon(xPoints, yPoints, 5);
+                }
+            }
+            
+            private void startAnimation() {
+                animationTimer = new Timer(50, e -> {
+                    animationTime += 0.05f;
+                    repaint();
+                });
+                animationTimer.start();
+            }
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                startAnimation();
+            }
+            
+            @Override
+            public void removeNotify() {
+                super.removeNotify();
+                if (animationTimer != null) {
+                    animationTimer.stop();
+                }
             }
         };
         mainPanel.setLayout(new BorderLayout());
