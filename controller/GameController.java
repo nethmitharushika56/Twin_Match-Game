@@ -1,253 +1,126 @@
 package controller;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
 import model.GameLevel;
 import model.GameState;
-import model.HighScoreManager;
-import model.Tile;
-import util.SoundManager;
-import view.GameWindow;
+import view.AdvancedLevel;
+import view.BeginnerLevel;
+import view.IntermediateLevel;
 import view.LevelSelectionScreen;
+import view.SettingsDialog;
 import view.StartScreen;
 
-import java.awt.Insets;
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
- * Main game controller that manages game state and coordinates between UI and logic
-/**
-/**
- * Main game controller that manages game state and coordinates between UI and logic
+ * Central UI controller: routes between screens and starts/resumes levels.
  */
 public class GameController {
 
-    private static final GameLevel BEGINNER = null;
+    private GameState currentState;  // holds current game progress
+    private JFrame currentFrame;     // keeps track of the active game window
 
-    // Configure game settings based on selected level
-    private void configureGameSettings(GameLevel level, GameState gameState) {
-        if (level == GameLevel.BEGINNER) {
-            gameState.setTotalPairs(4);
-            gameState.setTimeLimit(0); // No time limit
-        } else if (level == GameLevel.INTERMEDIATE) {
-                gameState.setTotalPairs(8);
-                gameState.setTimeLimit(180); // 3 minutes
-                // You may handle additional levels here if needed
-        }
-        if (gameState == null || gameState.isGameOver() || gameState.isPaused()) return;
-
-        GameWindow gameWindow = null;
-        // Ensure gameWindow is a field so it can be accessed elsewhere
-        if (gameWindow == null) {
-            gameWindow = new GameWindow(this);
-        }
-        gameWindow.startNewGame(gameState);
-        startTimer();
-
-        Object col = null;
-        Object row = null;
-        // col and row should be passed as parameters or determined by user action, not hardcoded
-        // Remove their initialization here
-        Tile selectedTile = ((GameState) gameState).getTile(row, col);
-        if (selectedTile == null || selectedTile.isMatched() || selectedTile.isFlipped()) return;
-
-        selectedTile.flip();
-        SoundManager.playTileFlipSound();
-        gameWindow.updateTile(row, col);
-
-        if (((GameState) gameState).getFirstSelection() == null) {
-            ((GameState) gameState).setFirstSelection(selectedTile);
-        } else {
-            ((GameState) gameState).setSecondSelection(selectedTile);
-            ((GameState) gameState).incrementAttempts();
-
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    SwingUtilities.invokeLater(() -> checkForMatch());
-                }
-            }, 1000);
-        }
-    }
-
-    /**
-     * Check if the selected tiles match
-     */
-    private void checkForMatch() {
-        GameState gameState = null;
-        Tile first = gameState.getFirstSelection();
-        Tile second = gameState.getSecondSelection();
-
-        if (first != null && second != null) {
-            if (first.getImageId() == second.getImageId()) {
-                first.setMatched(true);
-                second.setMatched(true);
-                gameState.incrementScore(10);
-                gameState.incrementMatchesFound();
-                SoundManager.playMatchSound();
-
-                if (gameState.getMatchesFound() >= gameState.getTotalPairs()) {
-                    endGame(true);
-                }
-            } else {
-                first.flip();
-                second.flip();
-                SoundManager.playMismatchSound();
-            }
-
-            GameWindow gameWindow = null;
-            gameWindow.updateAllTiles();
-            gameWindow.updateScore();
-
-            gameState.setFirstSelection(null);
-            gameState.setSecondSelection(null);
-        }
-    }
-
-    /**
-     * Starts the game timer if applicable
-     */
-    private void startTimer() {
-        GameState gameState = null;
-        if (gameState.getTimeLimit() > 0) {
-            final int timeRemaining = gameState.getTimeLimit();
-            Timer gameTimer = new Timer();
-            gameTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    SwingUtilities.invokeLater(() -> {
-                        GameState gameState = GameState.getInstance();
-                        int timeLeft = gameState.getTimeRemaining();
-                        GameWindow gameWindow = GameWindow.getInstance();
-                        if (gameWindow != null) {
-                            gameWindow.updateTimer(timeLeft);
-                        }
-                        if (timeLeft <= 0) {
-                            endGame(false);
-                        }
-            });
-        
-        }}, null, timeRemaining);}
-    }
-
-    /**
-     * Ends the game and handles high score dialog
-     */
-    private void endGame(boolean won) {
-        Object gameTimer = null;
-        if (gameTimer != null) {
-            ((Timer) gameTimer).cancel();
-        }
-
-        GameState gameState = null;
-        gameState.setGameOver(true);
-        gameState.setWon(won);
-
-        SoundManager.playGameOverSound();
-
-        GameWindow gameWindow = GameWindow.getInstance();
-        if (won && HighScoreManager.isHighScore(gameState.getLevel(), gameState.getScore())) {
-            String playerName = JOptionPane.showInputDialog(
-                gameWindow,
-                "🎉 Congratulations! You achieved a high score!\nEnter your name:",
-                "High Score!",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            if (playerName != null && !playerName.trim().isEmpty()) {
-                HighScoreManager.addHighScore(
-                    gameState.getLevel(),
-                    playerName.trim(),
-                    gameState.getScore(),
-                    gameState.getAttempts()
-                );
-            }
-        }
-
-        gameWindow.showGameOver(won);
-    }
-
-    /**
-     * Pause the game (including timer)
-     */
-    public void pauseGame() {
-        GameState gameState = null;
-        gameState.setPaused(true);
-        Object gameTimer = null;
-        if (gameTimer != null) ((Timer) gameTimer).cancel();
-    }
-
-    /**
-     * Resume game and restart the timer
-     */
-    public void resumeGame() {
-        GameState gameState = null;
-        gameState.setPaused(false);
-        startTimer();
-    }
-
-    public GameState getGameState() {
-        return getGameState();
-    }
-
-    public void showMainMenu() {
-        startGame(); // Redirect to StartScreen
-    }
-
+    /** Launch the start screen. */
     public void startGame() {
-        new StartScreen(this);
+        closeCurrentFrame();
+        currentFrame = new StartScreen(this);
     }
 
+    /** Show the main menu (alias of start). */
+    public void showMainMenu() {
+        startGame();
+    }
+
+    /** Open the level selection screen. */
     public void showLevelSelection() {
-        // Display the Level Selection screen
-        LevelSelectionScreen levelSelectionScreen = new LevelSelectionScreen(this);
-        levelSelectionScreen.setVisible(true);
-    }
-    
-
-	public void startNewGame(model.GameLevel level) {
-        // Create a new GameState for the selected level
-        GameState gameState = new GameState(level);
-        gameState.setLevel(level);
-    
-        if (level == GameLevel.BEGINNER) {
-            // 🔹 Open your custom BeginnerLevel JFrame
-            new view.BeginnerLevel(this);
-            return;
-        }
-    
-        if (level == GameLevel.INTERMEDIATE) {
-            gameState.setTotalPairs(8);
-            gameState.setTimeLimit(180); // 3 min
-            // TODO: new view.IntermediateLevel(this);
-            return;
-        }
-    
-
-        if (level == GameLevel.ADVANCED) {
-            gameState.setTotalPairs(12);
-            gameState.setTimeLimit(120); // 2 min
-            // TODO: new view.AdvancedLevel(this);
-            return;
-        }
-    
-        // Fallback: still use GameWindow if nothing matched
-        GameWindow gameWindow = new GameWindow(this);
-        gameWindow.startNewGame(gameState);
-        startTimer();
-    }
-    
-    
-
-    public void showGameScreen(GameLevel level) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'showGameScreen'");
+        closeCurrentFrame();
+        currentFrame = new LevelSelectionScreen(this);
     }
 
-	public void onTileSelected(int finalRow, int finalCol) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'onTileSelected'");
-	}
-    
-    
+    /** Open the settings dialog (no specific parent). */
+    public void showSettings() {
+        SettingsDialog dialog = new SettingsDialog(currentFrame);
+        dialog.setVisible(true);
+    }
+
+    /** Open the settings dialog with an explicit parent frame. */
+    public void showSettings(JFrame parent) {
+        SettingsDialog dialog = new SettingsDialog(parent);
+        dialog.setVisible(true);
+    }
+
+    /** Start a new game for the selected level by opening the corresponding screen. */
+    public void startNewGame(GameLevel level) {
+        if (level == null) return;
+
+        closeCurrentFrame();
+        switch (level) {
+            case BEGINNER:
+                currentFrame = new BeginnerLevel(this);
+                break;
+            case INTERMEDIATE:
+                currentFrame = new IntermediateLevel(this);
+                break;
+            case ADVANCED:
+                currentFrame = new AdvancedLevel(this);
+                break;
+            default:
+                startGame();
+        }
+
+        // Create a new game state
+        currentState = new GameState(level);
+    }
+
+    /** Resume game if there is a saved state. */
+    public void resumeGame() {
+        if (currentState == null) {
+            // No saved game → go back to level selection
+            showLevelSelection();
+            return;
+        }
+
+        closeCurrentFrame();
+        GameLevel level = currentState.getLevel();
+
+        switch (level) {
+            case BEGINNER:
+                currentFrame = new BeginnerLevel(this);
+                break;
+            case INTERMEDIATE:
+                currentFrame = new IntermediateLevel(this);
+                break;
+            case ADVANCED:
+                currentFrame = new AdvancedLevel(this);
+                break;
+            default:
+                showMainMenu();
+        }
+    }
+
+    /** Pause the game (simply save state, keep currentFrame open). */
+    public void pauseGame() {
+        if (currentState != null) {
+            currentState.setPaused(true);
+        }
+    }
+
+    /** Called when a tile is selected. */
+    public void onTileSelected(int row, int col) {
+        if (currentState != null) {
+            currentState.handleTileSelection(row, col);
+        }
+    }
+
+    /** Returns the active game state. */
+    public GameState getGameState() {
+        return currentState;
+    }
+
+    /** Utility: Close the current frame before switching screens. */
+    private void closeCurrentFrame() {
+        if (currentFrame != null) {
+            currentFrame.dispose();
+            currentFrame = null;
+        }
+    }
 }

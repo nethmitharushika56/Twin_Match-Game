@@ -5,8 +5,8 @@ package model;
  */
 public enum GameLevel {
     BEGINNER("Beginner", "4x4 grid, no time limit"),
-    INTERMEDIATE("Intermediate", "6x6 grid, 3 minutes"),
-    ADVANCED("Advanced", "8x8 grid, 2 minutes");
+    INTERMEDIATE("Intermediate", "4x4 grid, 1 minutes"),
+    ADVANCED("Advanced", "5x5 grid, 1 minutes");
 
     private final String displayName;
     private final String description;

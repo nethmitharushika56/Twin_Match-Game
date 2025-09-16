@@ -1,8 +1,8 @@
 package view;
 
 import controller.GameController;
-import util.AnimationManager;
 import util.SoundManager;
+import util.AnimationManager; // 🔥 Import fireworks panel
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,31 +11,35 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class BeginnerLevel extends JFrame {
+public class IntermediateLevel extends JFrame {
     private final int GRID_SIZE = 4; // 4x4 grid
     private final JButton[] tiles = new JButton[GRID_SIZE * GRID_SIZE];
-    private final String BACK_IMAGE = "assets/tiles_back.png"; // face-down image
-    private String[] tileImages; // randomized images for 16 slots
+    private final String BACK_IMAGE = "assets/tiles_back.png";
+    private String[] tileImages;
     private JButton firstSelected = null;
     private JButton secondSelected = null;
     private javax.swing.Timer flipBackTimer;
     private int matchedPairs = 0;
 
     private final GameController controller;
+    private JLabel timerLabel;
+    private javax.swing.Timer gameTimer;
+    private int remainingSeconds = 60; // 1 minute countdown
 
-    private boolean allowClicks = false; // disable clicks during countdown
+    // NEW: block clicks until countdown finishes
+    private boolean allowClicks = false;
 
-    public BeginnerLevel(GameController controller) {
+    public IntermediateLevel(GameController controller) {
         this.controller = controller;
 
-        setTitle("Beginner Level - Twin Match");
+        setTitle("Intermediate Level - Twin Match");
         setSize(800, 850);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // ---------- Background Panel ----------
         JPanel backgroundPanel = new JPanel() {
-            private final Image bg = new ImageIcon("assets/beginner_bg.png").getImage();
+            private Image bg = new ImageIcon("assets/intermediate_bg.png").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -58,17 +62,28 @@ public class BeginnerLevel extends JFrame {
 
         pauseBtn.addActionListener(e -> {
             SoundManager.playButtonClickSound();
+            pauseTimer();
             JOptionPane.showMessageDialog(this, "Game Paused");
+            startTimer(); // resume after dialog
         });
 
         backBtn.addActionListener(e -> {
             SoundManager.playButtonClickSound();
+            if (gameTimer != null) gameTimer.stop();
             dispose();
             new LevelSelectionScreen(controller);
         });
 
+        // Timer label
+        timerLabel = new JLabel("Time: 01:00");
+        timerLabel.setFont(new Font("Arial Black", Font.BOLD, 24));
+        timerLabel.setForeground(Color.WHITE);
+
         controlPanel.add(pauseBtn);
         controlPanel.add(backBtn);
+        controlPanel.add(Box.createHorizontalStrut(20));
+        controlPanel.add(timerLabel);
+
         backgroundPanel.add(controlPanel, BorderLayout.NORTH);
 
         // ---------- Game Grid ----------
@@ -76,7 +91,6 @@ public class BeginnerLevel extends JFrame {
         gridPanel.setOpaque(false);
         backgroundPanel.add(gridPanel, BorderLayout.CENTER);
 
-        // Prepare randomized tiles
         tileImages = prepareRandomImages();
 
         for (int i = 0; i < tiles.length; i++) {
@@ -91,7 +105,7 @@ public class BeginnerLevel extends JFrame {
                     int arc = 20;
 
                     GradientPaint gradient = new GradientPaint(0, 0, new Color(173, 216, 230),
-                            w, h, Color.WHITE);
+                                                               w, h, Color.WHITE);
                     g2.setPaint(gradient);
                     g2.fillRoundRect(0, 0, w, h, arc, arc);
 
@@ -111,29 +125,30 @@ public class BeginnerLevel extends JFrame {
             tiles[i].setIcon(getScaledIcon(BACK_IMAGE));
 
             final int index = i;
-            tiles[i].addActionListener(e -> {
-                if (allowClicks) handleTileClick(index);
-            });
-
+            tiles[i].addActionListener(e -> handleTileClick(index));
             gridPanel.add(tiles[i]);
         }
 
-        // ---------- Start Countdown ----------
-        startCountdown(() -> allowClicks = true); // enable clicks after countdown
-
+        // Show window before countdown overlay
         setVisible(true);
+
+        // Start countdown before allowing play
+        startCountdown(() -> {
+            allowClicks = true;
+            startTimer();
+        });
     }
 
     // ---------- Countdown ----------
     private void startCountdown(Runnable onComplete) {
-        allowClicks = false;
-
         JLayeredPane layeredPane = getLayeredPane();
 
         JLabel countdownLabel = new JLabel("", SwingConstants.CENTER);
         countdownLabel.setFont(new Font("Arial Black", Font.BOLD, 120));
-        countdownLabel.setForeground(new Color(0x00008B)); // dark blue
-        countdownLabel.setBounds(0, 0, getWidth(), getHeight());
+        countdownLabel.setForeground(new Color(0x00008B));
+
+        Dimension size = getContentPane().getSize();
+        countdownLabel.setBounds(0, 0, size.width, size.height);
         countdownLabel.setHorizontalAlignment(SwingConstants.CENTER);
         countdownLabel.setVerticalAlignment(SwingConstants.CENTER);
 
@@ -149,31 +164,32 @@ public class BeginnerLevel extends JFrame {
                 count[0]--;
             } else {
                 countdownLabel.setText("Go!");
-                ((javax.swing.Timer) e.getSource()).stop();
+                countdownTimer.stop();
 
-                new javax.swing.Timer(500, ev -> {
+                javax.swing.Timer goTimer = new javax.swing.Timer(500, ev -> {
                     layeredPane.remove(countdownLabel);
                     layeredPane.revalidate();
                     layeredPane.repaint();
-
                     onComplete.run();
-                }).start();
+                });
+                goTimer.setRepeats(false);
+                goTimer.start();
             }
         });
         countdownTimer.start();
     }
 
-    // ---------- Prepare 16 images (8 pairs) ----------
+    // ---------- Prepare 8 pairs (16 tiles) ----------
     private String[] prepareRandomImages() {
         String[] availableImages = {
-                "assets/tiles/img1.jpg",
-                "assets/tiles/img2.png",
-                "assets/tiles/img3.png",
-                "assets/tiles/img11.png",
-                "assets/tiles/img5.jpg",
-                "assets/tiles/img6.jpg",
-                "assets/tiles/img7.png",
-                "assets/tiles/img8.png"
+            "assets/tiles/img1.jpg",
+            "assets/tiles/img2.png",
+            "assets/tiles/img3.png",
+            "assets/tiles/img4.jpeg",
+            "assets/tiles/img5.jpg",
+            "assets/tiles/img6.jpg",
+            "assets/tiles/img7.png",
+            "assets/tiles/img8.png"
         };
 
         ArrayList<String> imagesList = new ArrayList<>();
@@ -185,8 +201,9 @@ public class BeginnerLevel extends JFrame {
         return imagesList.toArray(new String[0]);
     }
 
-    // ---------- Handle tile clicks ----------
+    // ---------- Tile click handler ----------
     private void handleTileClick(int index) {
+        if (!allowClicks) return; // block until countdown finishes
         if (firstSelected != null && secondSelected != null) return;
 
         tiles[index].setIcon(getScaledIcon(tileImages[index]));
@@ -203,23 +220,9 @@ public class BeginnerLevel extends JFrame {
                     firstSelected = null;
                     secondSelected = null;
                     matchedPairs++;
-
-                    // WIN condition here
                     if (matchedPairs == 8) {
-                        SwingUtilities.invokeLater(() -> {
-                            AnimationManager.FireworksPanel fireworks = new AnimationManager.FireworksPanel();
-                            JLayeredPane layeredPane = getLayeredPane();
-                            fireworks.setBounds(0, 0, getWidth(), getHeight());
-                            layeredPane.add(fireworks, JLayeredPane.DRAG_LAYER);
-
-                            showWinDialog();
-
-                            // remove fireworks after message
-                            fireworks.stop();
-                            layeredPane.remove(fireworks);
-                            layeredPane.revalidate();
-                            layeredPane.repaint();
-                        });
+                        if (gameTimer != null) gameTimer.stop();
+                        showWinAnimation(); // 🎆 show fireworks
                     }
                 });
                 removeTimer.setRepeats(false);
@@ -237,6 +240,23 @@ public class BeginnerLevel extends JFrame {
         }
     }
 
+    // ---------- Fireworks on Win ----------
+    private void showWinAnimation() {
+        SwingUtilities.invokeLater(() -> {
+            AnimationManager.FireworksPanel fireworks = new AnimationManager.FireworksPanel();
+            JLayeredPane layeredPane = getLayeredPane();
+            fireworks.setBounds(0, 0, getWidth(), getHeight());
+            layeredPane.add(fireworks, JLayeredPane.DRAG_LAYER);
+
+            showWinDialog();
+
+            fireworks.stop();
+            layeredPane.remove(fireworks);
+            layeredPane.revalidate();
+            layeredPane.repaint();
+        });
+    }
+
     private String getTileImage(JButton button) {
         for (int i = 0; i < tiles.length; i++) {
             if (tiles[i] == button) return tileImages[i];
@@ -250,7 +270,6 @@ public class BeginnerLevel extends JFrame {
         return new ImageIcon(scaled);
     }
 
-    // ---------- Custom gradient buttons ----------
     private JButton createCustomButton(String text) {
         JButton button = new JButton(text) {
             @Override
@@ -263,7 +282,7 @@ public class BeginnerLevel extends JFrame {
                 int h = getHeight();
 
                 GradientPaint gradient = new GradientPaint(0, 0, new Color(0x001F4D),
-                        w, h, new Color(0x001A3D));
+                                                           w, h, new Color(0x001A3D));
                 g2.setPaint(gradient);
                 g2.fillRoundRect(0, 0, w, h, arc, arc);
 
@@ -285,6 +304,26 @@ public class BeginnerLevel extends JFrame {
 
         return button;
     }
+
+    // ---------- Timer ----------
+    private void startTimer() {
+        gameTimer = new javax.swing.Timer(1000, e -> {
+            remainingSeconds--;
+            int minutes = remainingSeconds / 60;
+            int seconds = remainingSeconds % 60;
+            timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
+
+            if (remainingSeconds <= 0) {
+                gameTimer.stop();
+                showLoseDialog();
+            }
+        });
+        gameTimer.start();
+    }
+
+    private void pauseTimer() {
+        if (gameTimer != null) gameTimer.stop();
+    }
     
     private void showWinDialog() {
         JDialog winDialog = new JDialog(this, "Congratulations!", true);
@@ -303,7 +342,7 @@ public class BeginnerLevel extends JFrame {
         panel.add(titleLabel, BorderLayout.NORTH);
         
         // Message
-        JLabel messageLabel = new JLabel("Congratulations!!", SwingConstants.CENTER);
+        JLabel messageLabel = new JLabel("Congratulations!", SwingConstants.CENTER);
         messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         panel.add(messageLabel, BorderLayout.CENTER);
         
@@ -314,7 +353,7 @@ public class BeginnerLevel extends JFrame {
         JButton replayButton = createDialogButton("Replay", new Color(34, 139, 34), e -> {
             winDialog.dispose();
             dispose();
-            new BeginnerLevel(controller);
+            new IntermediateLevel(controller);
         });
         
         JButton backButton = createDialogButton("Main Menu", new Color(220, 20, 60), e -> {
@@ -329,6 +368,51 @@ public class BeginnerLevel extends JFrame {
         
         winDialog.setContentPane(panel);
         winDialog.setVisible(true);
+    }
+    
+    private void showLoseDialog() {
+        JDialog loseDialog = new JDialog(this, "Game Over", true);
+        loseDialog.setSize(400, 200);
+        loseDialog.setLocationRelativeTo(this);
+        loseDialog.setResizable(false);
+        
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        panel.setBackground(new Color(255, 240, 240));
+        
+        // Title
+        JLabel titleLabel = new JLabel("Time's Up!", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial Black", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(139, 0, 0));
+        panel.add(titleLabel, BorderLayout.NORTH);
+        
+        // Message
+        JLabel messageLabel = new JLabel("Time ran out!", SwingConstants.CENTER);
+        messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        panel.add(messageLabel, BorderLayout.CENTER);
+        
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonPanel.setOpaque(false);
+        
+        JButton replayButton = createDialogButton("Replay", new Color(34, 139, 34), e -> {
+            loseDialog.dispose();
+            dispose();
+            new IntermediateLevel(controller);
+        });
+        
+        JButton backButton = createDialogButton("Main Menu", new Color(220, 20, 60), e -> {
+            loseDialog.dispose();
+            dispose();
+            new LevelSelectionScreen(controller);
+        });
+        
+        buttonPanel.add(replayButton);
+        buttonPanel.add(backButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        loseDialog.setContentPane(panel);
+        loseDialog.setVisible(true);
     }
     
     private JButton createDialogButton(String text, Color color, java.awt.event.ActionListener action) {
