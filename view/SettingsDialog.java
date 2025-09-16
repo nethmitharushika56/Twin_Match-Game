@@ -50,30 +50,26 @@ public class SettingsDialog extends JDialog {
         titleLabel.setBorder(new EmptyBorder(10, 0, 20, 0));
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Left panel with vertical items
+        // Left panel with vertical layout for all buttons
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setOpaque(false);
         leftPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Sound row
-        JPanel soundRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        soundRow.setOpaque(false);
+        // Sound toggle
         JLabel soundLabel = new JLabel("Sound");
         soundLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         soundLabel.setForeground(Color.WHITE);
         soundToggle = new AnimatedToggle(SoundManager.isSoundEnabled());
-        soundRow.add(soundLabel);
-        soundRow.add(Box.createHorizontalStrut(15));
-        soundRow.add(soundToggle);
 
         // Buttons
         JButton profileButton = createRoundButton("Profile", e -> showProfileDialog());
         JButton instructionsButton = createRoundButton("Instructions", e -> showInstructionsDialog());
         JButton privacyButton = createRoundButton("Policy", e -> showPrivacyDialog());
 
-        // Add to left panel
-        leftPanel.add(soundRow);
+        // Add all items to left panel in one vertical column
+        leftPanel.add(soundLabel);
+        leftPanel.add(soundToggle);
         leftPanel.add(Box.createVerticalStrut(20));
         leftPanel.add(profileButton);
         leftPanel.add(Box.createVerticalStrut(15));
@@ -87,8 +83,8 @@ public class SettingsDialog extends JDialog {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 15));
         bottomPanel.setOpaque(false);
 
-        JButton saveButton = createFilledButton("Save", new Color(30, 144, 255), e -> saveSettings()); // light blue
-        JButton cancelButton = createFilledButton("Cancel", new Color(220, 20, 60), e -> dispose());   // red
+        JButton saveButton = createFilledButton("Save", new Color(135, 206, 250), e -> saveSettings()); // light blue
+        JButton cancelButton = createFilledButton("Cancel", new Color(255, 0, 0), e -> dispose());      // red
 
         bottomPanel.add(saveButton);
         bottomPanel.add(cancelButton);
@@ -100,8 +96,24 @@ public class SettingsDialog extends JDialog {
 
     private void showInstructionsDialog() {
         JOptionPane.showMessageDialog(this,
-                "📘 Game Instructions\n\n1. Start the game using the Play button.\n2. Use arrow keys / controls to move.\n3. Score points by completing objectives.\n4. You can pause from the menu.\n\nEnjoy playing!",
-                "Instructions", JOptionPane.INFORMATION_MESSAGE);
+                "🎮 Twin Match Game Instructions\n\n" +
+                "HOW TO PLAY:\n" +
+                "1. Click on a tile to reveal an image\n" +
+                "2. Click on a second tile to reveal another image\n" +
+                "3. If the images match, the tiles disappear and you earn points\n" +
+                "4. If they don't match, the tiles flip back\n" +
+                "5. Complete the board by matching all pairs\n\n" +
+                "GAME LEVELS:\n" +
+                "• Beginner: 8 pairs (16 tiles) - No time limit\n" +
+                "• Intermediate: 8 pairs (16 tiles) - 1 minute limit\n" +
+                "• Advanced: 11 pairs + 3 bonus tiles (25 tiles) - 1 minute limit\n" +
+                "  * Bonus tiles add 15 minutes when clicked!\n\n" +
+                "CONTROLS:\n" +
+                "• Mouse Click: Select tiles\n" +
+                "• Pause Button: Pause/Resume game\n" +
+                "• Main Menu Button: Return to level selection\n\n" +
+                "Good luck and have fun! 🎯",
+                "Game Instructions", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void showProfileDialog() {
@@ -145,24 +157,12 @@ public class SettingsDialog extends JDialog {
     private JButton createFilledButton(String text, Color bg, java.awt.event.ActionListener action) {
         JButton button = new JButton(text);
         button.setFont(new Font("Segoe UI Black", Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setBackground(bg);
         button.setOpaque(true);
         button.setFocusPainted(false);
-        button.setBorder(new RoundedBorder(12, Color.WHITE));
+        button.setBorder(new RoundedBorder(12, bg.darker()));
         button.setPreferredSize(new Dimension(120, 40));
-
-        // Hover darker
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                button.setBackground(bg.darker());
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                button.setBackground(bg);
-            }
-        });
 
         button.addActionListener(action);
         return button;
@@ -177,7 +177,7 @@ public class SettingsDialog extends JDialog {
         AnimatedToggle(boolean initial) {
             this.on = initial;
             this.anim = initial ? 1f : 0f;
-            setPreferredSize(new Dimension(60, 30));
+            setPreferredSize(new Dimension(35, 18));
 
             addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
